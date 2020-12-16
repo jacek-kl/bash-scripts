@@ -1,0 +1,3 @@
+#!/usr/bin/sh
+echo "$1	$2	$3" >> ~/Desktop/vidth.log
+ffmpeg -loglevel quiet -y -ss 00:02:18 -i "$1" -frames:v 1 -filter:v scale=-2:$2 -an -c:v png $3

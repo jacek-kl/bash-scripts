@@ -1,0 +1,19 @@
+#!/usr/bin/bash
+temp=/tmp/audio-cover-thumbnail-$RANDOM
+
+kid3-cli -c "get picture:$temp" "$1"
+convert $temp'[0]' -thumbnail $2x$2 png:$3
+rc=$?
+if [ $rc -eq 1 ];then
+    wavepic=/tmp/wawe-file-thumbnail-${RANDOM}
+    spectrpic=/tmp/spectr-file-thumbnail-${RANDOM}
+    sox "$1" -t wav - | tee >(wav2png -f ffffffff -b 000000ff -w 256 -h 256 -o $wavepic - ) | sox - -n remix 1 spectrogram -y 128 -x 256 -o $spectrpic -rh -w rectangular
+    convert $wavepic -trim miff:- | convert - -resize 256x256\! $wavepic
+    convert $spectrpic -flip miff:- | convert $spectrpic - -append miff:- | \
+    convert - $wavepic -alpha off -compose CopyOpacity -composite miff:- | convert - -resize $2x$2 PNG:$3
+    rm $spectrpic $wavepic
+  
+else
+    #echo "2"  >> /home/jacek/.local/bin/log
+    rm $temp
+fi

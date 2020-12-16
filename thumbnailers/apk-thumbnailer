@@ -1,0 +1,14 @@
+#!/bin/sh
+#This needs a thumnailer entry placed in /usr/share/thumbnailers/
+#EXAMPLE ENTRY:
+#[Thumbnailer Entry]
+#TryExec=/usr/bin/apk-thumbnailer
+#Exec=/usr/bin/apk-thumbnailer %u %o
+#MimeType=application/vnd.android.package-archive" 
+file=$(echo "$1" | sed s'/file:\/\///g' | sed s'/%20/ /g' | sed s'/%5B/\[/g'| sed s'/%5D/\]/g') # Clean up thumbnailer for aapt
+icon=$(aapt d --values badging "$file" | grep application-icon- | sed s'/:/\n/g' | tail -n 1 | tr -d \') #Grab icon location
+mkdir /tmp/apkthumbnailer/
+cd /tmp/apkthumbnailer/
+unzip -o "$file" "$icon" # Extract icon
+convert -thumbnail 64 /tmp/apkthumbnailer/"$icon" "$2" # Make thumbnail
+exit
