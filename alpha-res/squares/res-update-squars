@@ -1,0 +1,7 @@
+#!/bin/bash
+rm -f squares.png
+#for f in square?.svg; do rsvg-convert -b black -f png -o ${f%.*}.png $f; done
+convert square?.png +append squarestemp.png
+
+convert squarestemp.png -resize x100 squares.png
+rm squarestemp.png
