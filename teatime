@@ -1,0 +1,96 @@
+#!/bin/bash
+osdfile=/osdtext
+
+while [ $(pgrep -c teatime) -ne 1 ];do
+    sleep .2
+done
+
+osdfile=/osdtext
+oldtext=$(cat $osdfile)
+
+function countdown(){
+for tea in $(seq $tea -1 1);
+do
+  if [ $check -eq 1 ] && [ $(pgrep -c teatime) -eq 2 ];then
+    resetosd
+    exit
+  fi
+
+  mins=$(($tea/60))
+  if [ $mins -eq 0 ]; then
+      mintext=
+  elif [ $mins -eq 1 ]; then
+      mintext="1 minutę i "
+  elif [ $mins -ge 2 ] && [ $mins -le 4 ]; then
+      mintext="$mins minuty i "
+  else
+      mintext="$mins minut i "
+  fi
+  
+  secs=$(($tea%60))
+  if [ $secs -eq 1 ]; then
+      sectext="1 sekundę"
+  elif [ $secs -ge 2 ] && [ $secs -le 4 ]; then
+      sectext="$secs sekundy"
+  else
+      sectext="$secs sekund"
+  fi
+
+  echo -e "$text ${mintext}${sectext}\n$oldtext" > $osdfile  
+  sleep 1;
+done
+}
+
+function teaready(){
+milena_say "herbatka jest już gotowa" &
+#krecik -t0 "☕ herbatka jest już gotowa "
+echo "☕🫖 herbatka już jest gotowa ☕🫖" > $osdfile
+
+xcowsay --image=/home/jacek/.local/share/images/tea.png --at=0,460 --bubble-at=-280,-170 --think -t0 "☕🫖 jestem gotowa ☕🫖" && resetosd
+#notify-send -i tea "herbatka" "już jest gotowa" -h string:x-canonical-private-synchronous:teatime ;
+#sleep 20
+#echo "☕ 🫖" > /home/jacek/.conky/text/textfile
+#sleep 40
+#echo "" > /home/jacek/.conky/text/textfile
+}
+
+function resetosd(){
+  echo "$oldtext" > $osdfile
+}
+
+if [ $# -ne 1 ]; then
+ tea=`yad --scale --window-icon=tea --image=tea --title "☕ Tea time ☕" --width=220 \
+ --text="Jak długo parzyć herbatkę?" --text-align=center --undecorated --buttons-layout=edge \
+ --min-value=90 --max-value=300 --value=150 --step=5 \
+ --mark=1½:90 --mark=2:120 --mark=2½:150 --mark=3:180 --mark=3½:210 --mark=4:240 --mark=4½:270 --mark=5:300 `
+else
+  tea=$1
+fi
+
+if [ -z $tea ]; then
+  exit
+elif [ $tea == "before" ];then
+  tea=$(($(date -d 17:00 +%s) - $(date +%s)))
+  if [ $tea -lt 0 ];then
+    echo -e "5 o’clock już minęło. Wypiłeś herbatkę?\n${oldtext}" > $osdfile
+    sleep 10
+    resetosd
+    exit 0
+  fi
+  check=1
+  echo "$tea"
+  text="Do codziennej ceremonii picia herbatki zostało"
+  countdown
+  echo -e "Nie będzie dzisiaj herbatki?\n${oldtext}" > $osdfile
+  sleep 25
+  echo -e "No cóż... bez herbatki też się da...\n${oldtext}" > $osdfile
+  sleep 5
+  resetosd
+else
+  text="herbatka ma się parzyć jeszcze"
+  check=0
+  countdown
+  teaready
+fi
+
+

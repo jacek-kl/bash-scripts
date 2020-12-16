@@ -1,0 +1,53 @@
+#!/bin/bash
+if [ $# -ne 1 ]; then
+FILE=`zenity --file-selection  --title="Wybierz plik"`
+else
+FILE="$@"
+fi
+
+plik=$(basename "$FILE")
+TMP=$(mktemp)
+
+
+function zapisz(){
+DIFF=$(diff -q --from-file "$FILE" "$TMP"; echo $?)
+	if [ "$DIFF" != 0 ]
+	then
+		mv "$FILE" "$FILE"~
+		mv $TMP "$FILE"
+			if [ -x "$FILE"~ ]
+			then
+			chmod +x "$FILE"
+			fi
+#		krecik --time=1 "Zapisano $plik" &
+	fi
+}
+
+function saveas(){
+mv $TMP `zenity --file-selection --save --confirm-overwrite --title="Wybierz plik"`
+}
+
+#280x355+1086+155
+function edytuj(){
+yad --text-info --editable --show-cursor --title="$plik" --filename="$FILE" \
+--geometry=422x673+946+114 --wrap --fore="#ffffbb" --back='#000000' \
+--enable-spell --button="yad-close:1" --button="yad-open:3" \
+--button="New:5" --button="yad-save:2" --button="SaveAs:4" \
+--button="yad-ok:0" --window-icon=krecik > $TMP
+ret=$?
+
+case "$ret" in
+0) zapisz && exit 0 ;;
+1) exit 0 ;;
+2) zapisz && edytuj ;;
+3) "$0" "`zenity --file-selection  --title="Wybierz plik"`" ;;
+4) saveas ; edytuj ;;
+5) "$0" `zenity --file-selection --save --confirm-overwrite --title="Nowy plik"` ;;
+252) exit 0 ;;
+*) exit 1 ;;
+esac
+}
+
+edytuj
+
+exit 0

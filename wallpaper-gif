@@ -1,0 +1,29 @@
+#!/bin/bash
+if [ -f /tmp/anim-wallpaper-pid ];then
+kill $(cat /tmp/anim-wallpaper-pid) && rm /tmp/anim-wallpaper-pid
+exit
+fi
+
+if [ $# -ne 1 ]; then
+ FILE=`zenity --file-selection --file-filter="*.gif"\
+ --title="Wybierz obrazek .gif jako Wallpaper"`
+else
+ FILE=$@
+fi
+
+gifsicle --resize-height 768 "$FILE" > /tmp/anim-gif-wallpaper.gif &
+gifsicle_id=$!
+
+if [ -z $FILE ]; then
+exit
+fi
+
+
+wait $gifsicle_id
+
+nice -n 19 xwinwrap -argb -fs -sp -ni -nf -st -s -b -fdt -- gifview -a -b0 -w WID /tmp/anim-gif-wallpaper.gif 2> /dev/null &
+wall_id=$!
+sleep 3
+wall2_id=$(pgrep -P $wall_id)
+echo "$wall_id $wall2_id" > /tmp/anim-wallpaper-pid
+exit 0

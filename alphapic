@@ -1,0 +1,47 @@
+#!/bin/bash
+if [ $# -lt 3 ] && [ $2 == "black" ] || [ $2 == "white" ];then
+    color=$(yad --color --gtk-palette --title="Wybierz kolor" \
+            --window-icon="/home/jacek/.local/share/icons/moje/inne/paint/pędzel.png")
+else
+    color="#$3"
+fi
+
+input="$1"
+dims=$(identify -format "%wx%h" "$1")
+
+output="${input%.*}.png"
+if [ -f "$output" ]; then
+    output="${input%.*}-$(date '+%Y.%m.%d %H.%M.%S').png"
+fi
+
+
+function colorek(){
+convert "$input" $blackorwhite -grayscale Rec709Luma -contrast-stretch 4%x0.5% miff:- | \
+convert -size $dims xc:$color - -alpha off -compose CopyOpacity \
+-composite "$output"
+}
+
+function obrazek(){
+convert "$input" $blackorwhite -grayscale Rec709Luma -contrast-stretch 4%x0.5% miff:- | \
+convert "$input" - -alpha off -compose CopyOpacity \
+-composite "$output"
+}
+
+
+if [ $2 == white ];then
+    blackorwhite=;
+    colorek
+elif [ $2 == black ];then
+    blackorwhite=-negate
+    colorek
+elif [ $2 == nowhite ];then
+    blackorwhite=-negate
+    obrazek
+elif [ $2 == noblack ];then
+    blackorwhite=;
+    obrazek
+else
+    echo "Nie wiem co prześwietlić, Bye"
+    exit
+fi
+

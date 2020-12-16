@@ -1,0 +1,74 @@
+#!/bin/sh
+
+##### Settings #####
+
+ikona=media-record
+sciezka=$(xdg-user-dir MUSIC)/recordings
+pulpit=$(xdg-user-dir DESKTOP)
+
+####################
+
+dzis=`date +%Y-%m-%d`
+printf "\033]0;$dzis\007"
+mkdir -p $sciezka
+
+#if [ -z "$(pidof cadence-jackmeter)" ]
+#  then
+#cadence-jackmeter &
+#cadence-jackmeter -in &
+#fi
+
+if ! pgrep -a meterbridge | egrep -q "system:capture_1 system:capture_2 system:monitor_1 system:monitor_2" ; then
+meterbridge -t dpm system:capture_1 system:capture_2 system:monitor_1 system:monitor_2 &
+fi
+until wmctrl -l | egrep "dpm bridge-"
+do
+sleep .1
+done
+wmctrl -ir $(wmctrl -lx | egrep "dpm bridge-" | awk '{print $1}') -e 0,0,0,-1,-1
+
+if [ ! -d $sciezka/$dzis ];
+then
+  mkdir $sciezka/$dzis;
+  gio set -t string $sciezka/$dzis  metadata::custom-icon-name $ikona;
+fi
+
+if [ ! -f $pulpit/$dzis.desktop ];
+then
+cat <<EOF >> $pulpit/$dzis.desktop
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Name=$dzis
+Comment=$sciezka/$dzis
+Icon=$ikona
+URL=$sciezka/$dzis
+Type=Link
+EOF
+gio set $pulpit/$dzis.desktop metadata::trusted yes
+chown "$whoami" $pulpit/$dzis.desktop
+chmod +x $pulpit/$dzis.desktop
+fi
+
+cd $sciezka/$dzis
+
+until wmctrl -lx | egrep "$dzis" | egrep terminal 
+do
+sleep .1
+done
+
+wid=$(wmctrl -lx | egrep "$dzis" | egrep terminal | awk '{print $1}')
+#echo $wid
+wmctrl -i -a $wid 
+#jack_capture -c 2 -p system:monitor*
+jack_capture -c 2 -p system:monitor* 2> /dev/null
+#echo nagrane
+#while pgrep -u jacek jack_captu+ > /dev/null; do sleep 0.2; done
+
+#pid=$(pgrep -a wget | grep "jack_capture -c 2 -p system:capture* 2> /dev/null" | awk '{print $1}')
+#tail --pid=$pid -f /dev/null
+
+justrecorded=`ls -1 -t | grep .wav | head -n 1`
+
+mpv --ao=jack "$justrecorded"
+

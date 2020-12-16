@@ -1,0 +1,26 @@
+#!/bin/bash
+if [ -f /tmp/anim-wallpaper-pid ];then
+kill $(cat /tmp/anim-wallpaper-pid) && rm /tmp/anim-wallpaper-pid
+exit
+fi
+
+WID=`xwinwrap -argb -fs -sp -ni -nf -st -s -b -fdt -- echo WID 2> /dev/null`
+ 	nice -n 19 xwinwrap -argb -fs -sp -ni -nf -st -s -b -fdt -- env XSCREENSAVER_WINDOW=$WID electricsheep 2> /dev/null &
+wall_id=$!
+sleep 3
+wall2_id=$(pgrep -P $wall_id)
+echo "$wall_id $wall2_id" > /tmp/anim-wallpaper-pid
+exit 0
+
+
+
+
+
+
+exit 
+if [ $(pgrep -c electricsheep) -eq 1 ] && [ $(pgrep -c xwinwrap2) -eq 1 ];then
+killall electricsheep
+killall xwinwrap2
+exit
+fi
+

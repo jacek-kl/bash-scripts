@@ -1,0 +1,7 @@
+#!/bin/bash
+rm -f circles.png
+for f in circle?.svg; do rsvg-convert -b black -f png -o ${f%.*}.png $f; done
+convert circle?.png +append kolatemp.png
+
+convert kolatemp.png -resize x100 circles.png
+rm kolatemp.png

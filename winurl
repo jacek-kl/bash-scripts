@@ -1,0 +1,77 @@
+#!/bin/bash
+tmpicon=/home/jacek/.local/share/icons/web/tempicon
+urlfile="$@"
+url=$(grep -ai "URL=" "$urlfile" | sed s/"URL="//g | sed 's/\r//g')
+#echo "url: $url"
+
+nietak() {
+rm $tmpicon
+gio set -t string "$urlfile" metadata::custom-icon "file:///home/jacek/.local/share/icons/hicolor/scalable/apps/Flower-of-Life.svg" ;
+}
+
+xdg-open "$url" &
+
+if [[ -z $(gio info -a metadata::custom-icon "$urlfile" | egrep metadata::custom-icon) ]];then
+ikony=$(wget -q -O - --user-agent=Mozilla $url | grep -e '<link rel="apple-touch-icon' -e '<link rel="icon"' -e '<link rel="shortcut icon"' | sed -rn 's/.*href="([^,]+)".*/\1/p' | awk -F \" '{print $1}')
+#echo "ikony: $ikony"
+
+#exit 0
+	if [[ -z $ikony ]]; then
+	ikony=$(wget -q -O - --user-agent=Mozilla $url | grep -e 'rel="apple-touch-icon"' | grep -e '.png' | sed -rn 's/.*<link href="([^,]+) rel="apple-touch-icon".*/\1/p')
+	fi
+
+	if [[ -z $ikony ]]; then
+	ikony=$(wget -q -O - --user-agent=Mozilla $url | grep -e 'rel="shortcut icon"' | grep -e '.ico' | sed -rn 's/.*<link href="([^,]+) rel="shortcut icon".*/\1/p')
+	fi
+
+	#echo "ikony: $ikony"
+	#exit 0
+
+	if [[ -z $ikony ]]; then
+	gio set -t string "$urlfile" metadata::custom-icon "/home/jacek/.local/share/icons/hicolor/scalable/apps/Flower-of-Life.svg" ;
+	elif [[ $ikony == *png* ]]; then
+	ikona=`echo "$ikony" | grep -e png | head -n 1`
+	#echo "ikonapng: $ikona"
+	else
+	ikona=`echo "$ikony" | head -n 1`
+	#echo "ikonaico: $ikona"
+	fi
+
+		if [[ $ikona == /* ]]; then
+		#echo "ikona1: $ikona"
+		ikona=`echo "$url" | awk -F / '{print $1"//"$3}'`$ikona
+		fi
+		#echo "ikona2: $ikona"
+		#exit 0
+
+
+	wget -q --user-agent=Mozilla "$ikona" -O "$tmpicon"
+
+	if [[ -s $tmpicon ]]; then
+	ext=`file -b --extension "$tmpicon"`
+
+		if [[ $ext == ??? ]]; then
+		type=`mimetype -bM "$tmpicon"`
+		#type=`file -b --mime-type "$tmpicon"`
+		ext="${type##*/}"
+		ext=`echo $ext | sed s/x-ms-bmp/bmp/g | sed s/jpeg/jpg/g`
+		fi
+
+		if [[ $ext == html ]]; then
+		echo OK
+		nietak
+		exit 0
+		fi
+
+	bname=${urlfile##*/}
+	name=${bname%.*}
+	newname=$name.$ext
+	mv "$tmpicon" "/home/jacek/.local/share/icons/web/$newname"
+	gio set -t string "$urlfile" metadata::custom-icon "/home/jacek/.local/share/icons/web/$newname"
+	trimtrees.pl /home/jacek/.local/share/icons/web/
+	else
+	nietak
+	fi
+
+fi
+

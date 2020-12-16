@@ -1,0 +1,92 @@
+#!/usr/bin/bash
+
+#<title>Nowy HTML</title>
+
+# <TODO>
+# koniec </TODO>
+
+if [ $# -eq 0 ]; then
+cd $(xdg-user-dir DESKTOP)
+else
+cd "$@"
+fi
+
+data=`yad --form --title="Nowy dokument HTML" --text="Nowy HTML" \
+--window-icon="krecik" --height=720 --width=420 \
+--separator="ↈ" \
+--field="Tytuł":CBE \
+--field="Kolor tła":CLR \
+--field="Kolor tekstu":CLR \
+--field="Padding-h":SCL \
+--field="Padding-v":SCL \
+--field="Text align":CB \
+--field="p indent":SCL \
+--field="Favicon":CBE \
+--field="Generator":CBE \
+--field="Author":CBE \
+--field="Keywords":CBE \
+--field="Description":CBE \
+--field="":TXT \
+--field="":TXT \
+"" "#FFFFD7" "#000000" "4" "2" "justify!left!center!right" "20" "favicon.ico" \
+"" "jacek" "" "" "" ""`
+
+tytul=$(echo "$data" | awk -Fↈ '{print $1}')
+if [ "$tytul" = "" ] ; then
+exit 0 ; fi
+
+bcolor=$(echo "$data" | awk -Fↈ '{print $2}')
+
+color=$(echo "$data" | awk -Fↈ '{print $3}')
+padh=$(echo "$data" | awk -Fↈ '{print $4}')
+padv=$(echo "$data" | awk -Fↈ '{print $5}')
+align=$(echo "$data" | awk -Fↈ '{print $6}')
+pindent=$(echo "$data" | awk -Fↈ '{print $7}')
+favicon=$(echo "$data" | awk -Fↈ '{print $8}')
+generator=$(echo "$data" | awk -Fↈ '{print $9}')
+author=$(echo "$data" | awk -Fↈ '{print $10}')
+keywords=$(echo "$data" | awk -Fↈ '{print $11}')
+description=$(echo "$data" | awk -Fↈ '{print $12}')
+text=$(echo "$data" | awk -Fↈ '{print $13}')
+text2=$(echo "$data" | awk -Fↈ '{print $14}')
+
+cat <<EOF >> "$tytul".html
+<!doctype html>
+<html lang="pl">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="$favicon">
+  <meta name="Generator" content="$generator">
+  <meta name="Author" content="$author">
+  <meta name="Keywords" content="$keywords">
+  <meta name="Description" content="$description">
+  <title>$tytul</title>
+  <style type="text/css" title="">
+   body{background-color:$bcolor; padding:$padv% $padh%;
+    text-align:$align; font:$font; color:$color; background-attachment: fixed;
+    background-image: url(''); background-position: ;
+    background-repeat: no-repeat; background-size: cover; }
+   p{text-indent:${pindent}px;}
+   a{text-decoration:none; color:$color;}
+   a:hover{text-decoration:underline;}
+  </style>
+ </head>
+ <body>
+  <center><h3>$tytul</h3></center>
+<p>$text</p>
+<p>$text2</p>
+
+
+ </body>
+</html>
+EOF
+
+( mv "${tytul}.html" "${tytul}.html~" && uconv -f utf-8 -t utf-8 --add-signature < "${tytul}.html~" > "${tytul}.html" ) || ( echo Error processing "$file" 1>&2 ; exit 1)
+
+#pluma "$tytul".html
+
+env WINEPREFIX='/home/jacek/.wine64' wine '/home/jacek/.wine64/dosdevices/c:/Program Files/EditPlus/editplus.exe' "$tytul".html
+
+WINEPREFIX=~/.wine wine "/home/jacek/.wine/drive_c/Program Files/EditPlus/editplus.exe" "$(winepath -w "$tytul".html)"
+

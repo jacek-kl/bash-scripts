@@ -1,0 +1,58 @@
+#!/bin/bash
+folder=$(cat /home/jacek/.ściągacz-chomikowy-last  | head -n 1 | cut -d'	' -f1)
+plik=$(cat /home/jacek/.ściągacz-chomikowy-last  | head -n 1 | cut -d'	' -f2)
+url=$(cat /home/jacek/.ściągacz-chomikowy-last  | head -n 1 | cut -d'	' -f3)
+
+coigdzie (){
+chomiczek=`yad --form --title="Ściągacz chomikowy"  --window-icon="chomik" --image="chomik" \
+--width=700 --button="yad-ok:0" \
+--field="Gdzie zapisać":DIR \
+--field="Nazwa pliku":CBE \
+--field="URL:":CBE \
+"$folder" "$plik" "!$url"`
+if [ ! $? = 0 ]; then
+ exit
+fi
+
+folder=$(echo "$chomiczek" | cut -d'|' -f1)
+plik=$(echo "$chomiczek" | cut -d'|' -f2)
+url=$(echo "$chomiczek" | cut -d'|' -f3)
+echo "$folder	$plik	$url	" > /home/jacek/.ściągacz-chomikowy-last
+
+wgetwindow
+}
+
+wgetwindow (){
+  cd "$folder"
+#  xfce4-terminal -T "$plik" --hide-borders --geometry=105x2 --hide-menubar -x sh -c 'printf "\033]0;$2\007" ; wget -c -nv --show-progress -T 25 -a /home/jacek/.ściągacz-chomikowy-last "$1" -O "$2"' sh "$url" "$plik"
+  mate-terminal -t "$plik" --profile=chomik -x sh -c 'printf "\033]0;$2\007" ; wget -c -nv --show-progress -T 25 -a /home/jacek/.ściągacz-chomikowy-last "$1" -O "$2"' sh "$url" "$plik" &
+  until pgrep -a wget | grep "wget -c -nv --show-progress -T 25 -a /home/jacek/.ściągacz-chomikowy-last "
+  do sleep .1; done
+  until wmctrl -lx | egrep "$plik" | egrep mate-terminal.Mate-terminal
+  do sleep .1; done
+  pid=$(pgrep -a wget | grep "wget -c -nv --show-progress -T 25 -a /home/jacek/.ściągacz-chomikowy-last " | awk '{print $1}')
+  wid=$(wmctrl -lx | egrep "$plik" | egrep mate-terminal.Mate-terminal | awk '{print $1}')
+  echo "$wid $pid"
+  sleep .5
+  toggle-decorations $wid
+  xseticon -id $wid '/home/jacek/.local/share/icons/hicolor/16x16/apps/chomik.png'
+  wmctrl -ir $wid -e 0,0,0,-1,-1
+  tail --pid=$pid -f /dev/null
+  lastline=$(tail -n 1 /home/jacek/.ściągacz-chomikowy-last)
+  if echo "$lastline" | grep -q "nie udało się rozwiązać adresu hosta" ; then
+    notify-send -i error "nie udało się rozwiązać adresu hosta"
+    #sleep 10
+    coigdzie
+  elif echo "$lastline" | grep -q "\] -> \"$plik\" \[1\]" ; then
+    notify-send -i chomik "$plik" zapisany
+    zenity --question --text="Plik „$plik” zapisany. Czy chcesz ściągać dalej?" && coigdzie
+  elif echo "$lastline" | grep -q "Załadowano certyfikat CA" ; then
+    notify-send -i chomik "Chyba przerwane"
+    coigdzie
+  else
+    notify-send -i chomik "$lastline"
+    coigdzie
+  fi
+}
+coigdzie
+

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+vars=$(yad --form --title="Ogarniacz rozdzielczości" --window-icon="obrazek" --center \
+--field="szerokość"!"jeśli 0 - bez zmiany rozmiaru":NUM \
+--field="wysokość"!"jeśli 0 - bez zmiany rozmiaru":NUM \
+--field="proporcje ⁈"!"jeśli tak to pewnie któryś bok będzie krótszy 😄 niż podałeś":CHK \
+--field="jakość"!"jeśli 0 a format webp - lossless":SCL \
+--field="zamienić ⁈"!"jeśli ten sam format - nadpisuje plik wejściowy":CHK \
+--field="format"!"...lub każdy inny obsługiwany przez ImageMagick":CBE \
+"1366!0..2048!8" "768!0..2048!8" true 85 false "jpg!png!webp")
+    [ "$?" = 1 ] && exit 1
+
+quality=$(echo "$vars" | awk -F\| '{print $4}')
+format=$(echo "$vars" | awk -F\| '{print $6}')
+
+
+if [ `echo "$vars" | awk -F\| '{print $1}'` == 0 ] || [ `echo "$vars" | awk -F\| '{print $2}'` == 0 ]; then
+    scale=
+elif [ `echo "$vars" | awk -F\| '{print $3}'` == FALSE ]; then
+    scale=$(echo "$vars" | awk -F\| '{print "-resize " $1"x"$2"!"}')
+else
+    scale=$(echo "$vars" | awk -F\| '{print "-resize " $1"x"$2}')
+fi
+
+if [ "$quality" -eq 0 ] && [ "$format" == "webp" ];then
+    webpl="-define webp:lossless=true"
+    quality=100
+else
+    webpl=
+fi
+
+for file in "$@"
+do
+    if [ `echo "$vars" | awk -F\| '{print $5}'` == TRUE ]; then
+        newname="$file"
+    else
+        newname="${file%.*}.${format}"
+        if [ -f "$newname" ]; then
+            newname="${file%.*}-$(date '+%Y.%m.%d %H.%M.%S').${format}"
+        fi
+    fi
+    convert "$file" $scale -quality $quality $webpl "$newname";
+    #jhead -autorot "${file%.*}-resized.jpg";
+done
+

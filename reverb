@@ -1,0 +1,34 @@
+#!/bin/sh
+mkdir -p ~/.jackrack
+if [ -n "$(jack_lsp -c system:capture_2 | grep system:playback_)" ]
+  then
+jack_disconnect system:capture_1 system:playback_1
+jack_disconnect system:capture_2 system:playback_2
+fi
+
+if [ -z "$(pidof jack-rack)" ]
+  then
+cd ~/.jackrack
+jack-rack -s 'reverberation' '~/.jackrack/reverb05' &
+until wmctrl -l | egrep "JACK Rack \(reverberation\)"
+do
+sleep .1
+done
+jack_connect system:capture_1 jack_rack_reverberation:in_1
+jack_connect system:capture_2 jack_rack_reverberation:in_2
+jack_connect jack_rack_reverberation:out_1 system:playback_1
+jack_connect jack_rack_reverberation:out_2 system:playback_2
+fi
+
+wmctrl -r "JACK Rack \(reverberation\)" -e 0,158,0,-1,-1
+fi
+
+if ! pgrep -a meterbridge | egrep -q "system:capture_1 system:capture_2 system:monitor_1 system:monitor_2" ; then
+meterbridge -t dpm system:capture_1 system:capture_2 system:monitor_1 system:monitor_2 &
+fi
+until wmctrl -l | egrep "dpm bridge-"
+do
+sleep .1
+done
+wmctrl -ir $(wmctrl -lx | egrep "dpm bridge-" | awk '{print $1}') -e 0,0,0,-1,-1
+wmctrl -a "JACK Rack \(reverberation\)"

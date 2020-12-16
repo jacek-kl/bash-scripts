@@ -1,0 +1,25 @@
+#!/bin/sh
+
+#output="${@%.*}.mp4"
+
+if [ -f "${@%.*}.mp4" ]; then
+  output="${@%.*}-small.mp4"
+else
+  output="${@%.*}.mp4"
+fi
+
+width=640
+height=480
+
+#width=320
+#height=240
+
+ffmpeg -i "$@" -acodec aac -b:a 64k -vol 256 -vcodec libx264 -b:v 512k -filter:v "scale=iw*min($width/iw\,$height/ih):ih*min($width/iw\,$height/ih)" -preset fast -profile:v high444 -pass 1 "$output"
+
+ffmpeg -y -i "$@" -acodec aac -b:a 64k -vol 256 -vcodec libx264 -b:v 512k -filter:v "scale=iw*min($width/iw\,$height/ih):ih*min($width/iw\,$height/ih)" -preset slower -profile:v high444 -pass 2 "$output"
+
+rm ffmpeg2pass-0.log ffmpeg2pass-0.log.mbtree
+
+
+
+

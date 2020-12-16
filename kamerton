@@ -1,0 +1,42 @@
+#!/bin/bash
+yad --form --title="kamerton" --window-icon="bass" --no-buttons --posy=-4 --undecorated \
+--field="Bass!bass":FBTN \
+--field="E1!bass":FBTN \
+--field="A1!bass":FBTN \
+--field="D2!bass":FBTN \
+--field="G2!bass":FBTN \
+--field="Gitara!gitara":FBTN \
+--field="E2!gitara":FBTN \
+--field="A2!gitara":FBTN \
+--field="D3!gitara":FBTN \
+--field="G3!gitara":FBTN \
+--field="H3!gitara":FBTN \
+--field="E4!gitara":FBTN \
+--field="Ukulele!ukulele":FBTN \
+--field="G3!ukulele":FBTN \
+--field="C4!ukulele":FBTN \
+--field="E4!ukulele":FBTN \
+--field="A4!ukulele":FBTN \
+--field="Tuner!tuner":FBTN \
+--field="PitchLab!chrome-bofpklgakdlflekbjdncfabhpfdmonnn-Default":FBTN \
+--field="Zamknij!gtk-close":FBTN \
+'sh -c "for n in E1 A1 D2 G2; do play -q -n synth 3 pluck $n repeat 2; done"' \
+'play -q -n synth 3 pluck E1 repeat 2' \
+'play -q -n synth 3 pluck A1 repeat 2' \
+'play -q -n synth 3 pluck D2 repeat 2' \
+'play -q -n synth 3 pluck G2 repeat 2' \
+'sh -c "for n in E2 A2 D3 G3 B3 E4; do play -q -n synth 4 pluck $n repeat 2; done"' \
+'play -q -n synth 3 pluck E2 repeat 2' \
+'play -q -n synth 3 pluck A2 repeat 2' \
+'play -q -n synth 3 pluck D3 repeat 2' \
+'play -q -n synth 3 pluck G3 repeat 2' \
+'play -q -n synth 3 pluck B3 repeat 2' \
+'play -q -n synth 3 pluck E4 repeat 2' \
+'sh -c "for n in G3 C4 E4 A4; do play -q -n synth 3 pluck $n repeat 2; done"' \
+'play -q -n synth 3 pluck G3 repeat 2' \
+'play -q -n synth 3 pluck C4 repeat 2' \
+'play -q -n synth 3 pluck E4 repeat 2' \
+'play -q -n synth 3 pluck A4 repeat 2' \
+'wine /home/jacek/.wine/drive_c/bb/tuner/Tuner.exe' \
+'gtk-launch chrome-bofpklgakdlflekbjdncfabhpfdmonnn-Default' \
+'bash -c "kill -USR1 $YAD_PID"'

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+#echo "Today is: `date +%d` `date +%B` `date +%Y` 	: `date +%k`o'clock and `date +%M` minut" | flite
+#echo "Dzisiaj jest: `date +%d` `date +%B` `date +%Y` godzina: `date +%k` i `date +%M` minut" | iconv -f UTF-8 -t ISO_8859-2 | festival --tts
+urodz=$(calendar -A0 | awk -F '\t' '{ print $2 }')
+count=$(echo "$urodz" | grep -c . -h -o )
+
+milena_say -E UTF-8 "Jest godzina $(date +%H | sed 's/01/pierwsza/g;s/02/druga/g;s/03/trzecia/g;s/04/czwarta/g;s/05/piąta/g;s/06/szósta/g;s/07/siódma/g;s/08/ósma/g;s/09/dziewiąta/g;s/10/dziesiąta/g;s/11/jedynasta/g;s/12/dwunasta/g;s/13/trzynasta/g;s/14/czternasta/g;s/15/piętnasta/g;s/16/szestnasta/g;s/17/siedemnasta/g;s/18/osiemnasta/g;s/19/dziewiętnasta/g;s/20/dwudziesta/g;s/21/dwudziesta pierwsza/g;s/22/dwudziesta druga/g;s/23/dwudziesta trzecia/g;s/00/dwudziesta czwarta/g') $(date +%M).
+$(date +%A), $(date +%d | sed 's/01/pierwszy/g;s/02/drugi/g;s/03/trzeci/g;s/04/czwarty/g;s/05/piąty/g;s/06/szósty/g;s/07/siódmy/g;s/08/ósmy/g;s/09/dziewiąty/g;s/10/dziesiąty/g;s/11/jedynasty/g;s/12/dwunasty/g;s/13/trzynasty/g;s/14/czternasty/g;s/15/piętnasty/g;s/16/szestnasty/g;s/17/siedemnasty/g;s/18/osiemnasty/g;s/19/dziewiętnasty/g;s/20/dwudziesty/g;s/21/dwudziesty pierwszy/g;s/22/dwudziesty drugi/g;s/23/dwudziesty trzeci/g;s/24/dwudziesty czwarty/g;s/25/dwudziesty piąty/g;s/26/dwudziesty szósty/g;s/27/dwudziesty siódmy/g;s/28/dwudziesty ósmy/g;s/29/dwudziesty dziewiąty/g;s/30/trzydziesty/g;s/31/trzydziesty pierwszy/g') $(date +%B)
+$(date +%Y | sed 's/2016/dwa tysiące szestnastego/g;s/2017/dwa tysiące siedemnastego/g;s/2018/dwa tysiące osiemnastego/g;s/2019/dwa tysiące dziewiętnastego/g;s/2020/dwa tysiące dwudziestego/g;s/2021/dwa tysiące dwudziestego pierwszego/g;s/2022/dwa tysiące dwudziestego drugiego/g;s/2023/dwa tysiące dwudziestego trzeciego/g;s/2024/dwa tysiące dwudziestego czwartego/g;s/2025/dwa tysiące dwudziestego piątego/g;s/2026/dwa tysiące dwudziestego szóstego/g;s/2027/dwa tysiące dwudziestego siódmego/g;s/2028/dwa tysiące dwudziestego ósmego/g;s/2029/dwa tysiące dwudziestego dziewiątego/g') roku."
+
+if [ $count -gt 1 ]; then
+milena_say -E UTF-8 "Urodziny obchodzą: $urodz"
+elif [ $count -eq 1 ]; then
+milena_say -E UTF-8 "Urodziny obchodzi: $urodz"
+else
+milena_say -E UTF-8 "Nikt ze znajomych nie obchodzi dzisiaj urodzin."
+fi
+

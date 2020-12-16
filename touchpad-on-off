@@ -1,0 +1,35 @@
+#!/bin/bash
+
+function on-off-gnome {
+state=`dconf read /org/gnome/desktop/peripherals/touchpad/send-events`
+   case $state in
+	"'enabled'"|"" )
+	 dconf write /org/gnome/desktop/peripherals/touchpad/send-events "'disabled'" ;;
+	"'disabled'"|"'disabled-on-external-mouse'" )
+	 dconf write /org/gnome/desktop/peripherals/touchpad/send-events "'enabled'" ;;
+	* )
+	 echo error;
+	 exit 1;
+	;;
+   esac
+}
+function on-off-mate {
+state=`dconf read /org/mate/desktop/peripherals/touchpad/touchpad-enabled`
+   case $state in
+	true )
+	 dconf write /org/mate/desktop/peripherals/touchpad/touchpad-enabled false ;;
+	false )
+	 dconf write /org/mate/desktop/peripherals/touchpad/touchpad-enabled true ;;
+	* )
+	 echo error;
+	 exit 1;
+	;;
+   esac
+}
+
+case $DESKTOP_SESSION in
+	gnome*) on-off-gnome ;;
+	mate*) on-off-mate ;;
+esac
+
+exit 0

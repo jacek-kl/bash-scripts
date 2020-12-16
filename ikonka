@@ -1,0 +1,40 @@
+#!/bin/bash
+iconname=`gio info -a metadata::custom-icon-name "$@" | grep metadata | awk '{print $2}'`
+
+cust=`gio info -a metadata::custom-icon "$@" | egrep metadata | sed s#"  metadata::custom-icon: "##g`
+
+
+if [[ ! $cust ]]; then
+	icon="|$@"
+else
+	icon="$cust"
+fi
+
+
+wynik=`yad --form --title "Ikonka" --width "500" \
+--field="custom-icon":CBE \
+--field="custom-icon-name":CBE \
+--item-separator="|" \
+"$icon" "$iconname"`
+rc=$?
+
+if [ $rc = 0 ] ; then
+	icon=$(echo "$wynik" | cut -d'|' -f1)
+	iconname=$(echo "$wynik" | cut -d'|' -f2)
+
+	if [[ ! $icon ]]; then
+		gio set -t unset "$@" metadata::custom-icon
+	elif [[ $icon ==  "/"* ]]; then
+		gio set -t string "$@"  metadata::custom-icon "file://$icon"
+	else
+		gio set -t string "$@"  metadata::custom-icon "$icon"
+	fi
+
+	if [ ! $iconname ]; then
+		gio set -t unset "$@" metadata::custom-icon-name
+	else
+		gio set -t string "$@"  metadata::custom-icon-name "$iconname"
+	fi
+
+	xdotool key F5
+fi

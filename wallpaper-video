@@ -1,0 +1,30 @@
+#!/bin/bash
+if [ -f /tmp/anim-wallpaper-pid ];then
+kill $(cat /tmp/anim-wallpaper-pid); 
+rm /tmp/anim-wallpaper-pid
+exit
+fi
+
+if [ $# -eq 0 ]; then
+ cd ~/Filmy
+ FILE=`zenity --file-selection --file-filter="pliki wideo | *.avi *.mpv *.mp4 *.rmvb *.webm" \
+ --title="Wybierz wideo albo film jako Wallpaper"`
+   if [ -z "$FILE" ]; then
+    exit
+   fi
+   audio=$(zenity --list --width="315" --height="160" --text "Opcje Wideo" --title "Screen Saver" --column "Opcje" "z dźwiękiem" "bez dźwięku")
+   case $audio in
+    "z dźwiękiem")unset audio ;;
+    "bez dźwięku")audio=--no-audio;;
+   esac
+   nice -n 19 xwinwrap -argb -fs -sp -ni -nf -st -s -b -fdt -- mpv -loop --really-quiet --panscan="1.0" -wid WID $audio "$FILE" &
+   wall_id=$!
+else
+  nice -n 19 xwinwrap -argb -fs -sp -ni -nf -st -s -b -fdt -- mpv -loop --really-quiet --panscan="1.0" -wid WID "$1" "$2" "$3" &
+  wall_id=$!
+fi
+
+sleep 3
+wall2_id=$(pgrep -P $wall_id)
+echo "$wall_id $wall2_id" > /tmp/anim-wallpaper-pid
+exit 0

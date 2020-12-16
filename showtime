@@ -1,0 +1,10 @@
+#!/bin/sh
+#notify-send -t 30000 -i '/home/jacek/.icons/moje/iCandy/Calendar Day.png' "$(date '+%A, %d %B %Y	%X')" "$(calendar | sed 's/	/ /g')"
+# saytime &
+krecik -t 0 "dzisiaj jest $(date '+%A, %d %B %Y	%X')
+
+urodziny obchodzą:
+$(calendar -A 6 | sed 's/	/ /g')
+
+imieniny:
+$(calendar -A 6 -f imieniny | sed 's/	/ /g')"

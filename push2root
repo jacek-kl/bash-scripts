@@ -1,0 +1,9 @@
+#!/bin/bash
+for arg
+do
+#adb push "$arg" "/storage/emulated/0/$(basename "$arg")"
+#adb push "$arg" "/storage/emulated/0/$(basename "$arg")"
+#adb push "$arg" "/storage/81EA-D3C0/$(basename "$arg")"
+#adb push "$arg" "/storage/7777-7777/$(basename "$arg")"
+adb push "$arg" "/storage/sdcard1/$(basename "$arg")"
+done

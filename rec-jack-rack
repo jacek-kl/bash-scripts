@@ -1,0 +1,45 @@
+#!/bin/sh
+
+##### Settings #####
+
+ikona=media-record
+sciezka=$(xdg-user-dir MUSIC)/recordings
+pulpit=$(xdg-user-dir DESKTOP)
+
+####################
+
+dzis=`date +%Y-%m-%d`
+printf "\033]0;$dzis\007"
+mkdir -p $sciezka
+
+if [ ! -f $pulpit/$dzis.desktop ];
+then
+
+cat <<EOF >> $pulpit/$dzis.desktop
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Name=$dzis
+Comment=$sciezka/$dzis
+Icon=$ikona
+URL=$sciezka/$dzis
+Type=Link
+EOF
+
+gio set $pulpit/$dzis.desktop metadata::trusted yes
+chown "$whoami" $pulpit/$dzis.desktop
+chmod +x $pulpit/$dzis.desktop
+
+#  ln -s $sciezka$dzis $pulpit$dzis;
+#  gio set -t string $pulpit$dzis  metadata::custom-icon-name $ikona;
+fi
+
+cd $sciezka/$dzis
+
+#xterm -e "jack_capture -c 2 -p jack_rack:out*" ;
+jack_capture -c 2 -p jack_rack:out*
+justrecorded=`ls -1 -t | grep .wav | head -n 1`
+#xterm -e "lame '$justrecorded' '$justrecorded'.mp3" &
+#xterm -e "echo sleeping && sleep 1 && clear && mpv '$justrecorded'"
+mpv --ao=jack "$justrecorded"
+exit 0

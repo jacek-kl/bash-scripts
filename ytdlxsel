@@ -1,0 +1,63 @@
+#!/bin/bash
+primary="$(xsel -p)"
+clipboard="$(xsel -b)"
+
+if [[ $primary == "http"* ]]
+then
+video="$primary"
+elif [[ $clipboard == "http"* ]]
+then
+video="$clipboard"
+else
+notify-send --icon=error "nie odnaleziono linku tylko:" "$primary
+$clipboard";
+exit 0
+fi
+
+if [[ $video == "https://freedisc.pl/"* ]]
+then
+ID=`echo $video | cut -d, -f2 | cut -d- -f2`
+Nazwa=`echo $video | cut -d, -f3 | sed s/-/./g`
+cd $(xdg-user-dir VIDEOS)
+wget -c --quiet --user-agent="Mozilla/5.0 (X11; U; Linux x86_64; pl-PL) AppleWebKit/532.0 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/549.0" --referer="http://reseton.pl/static/player/v612/jwplayer.flash.swf" "http://stream.freedisc.pl/video/$ID/$Nazwa" && exit
+notify-send -t 20000 -i error "Chyba coś poszło nie tak"
+exit
+fi
+
+title="$(youtube-dl -e $video | sed 's#?##g' | sed 's#&#&amp;#g'   )"
+wget -q "$(youtube-dl --get-thumbnail $video)" -O "/tmp/$title";
+
+# notify-send -t 2000 -i youtube "$title";
+
+yad --picture --undecorated --title "$title" --window-icon="/tmp/$title" --filename="/tmp/$title" --size=fit \
+--geometry=420x320+80+80 \
+--text "<b>„$title”</b>
+Chcesz zapisać jako wideo czy jako audio?" --text-align=center \
+--button="Wideo!Nocturnal:0" --button="Audio!gnome-volume-control:1" --button="Wyjdź!shutdown-black:2" --buttons-layout=center
+rc=$?
+
+#echo $rc
+if [[ $rc = 0 || $rc = 70 ]] ; then
+notify-send -t 30000 -i "/tmp/$title" "Ściągam wideo" "$title";
+youtube-dl -c -o "$(xdg-user-dir VIDEOS)/%(title)s.%(ext)s" --netrc --no-part --all-subs --sub-format=best --embed-subs --add-metadata --merge-output-format mkv "$video" --exec 'yad --picture --undecorated --title "$(echo $(basename {} | cut -d. -f1))" --window-icon="/tmp/$(echo $(basename {} | cut -d. -f1))" --filename="/tmp/$(echo $(basename {} | cut -d. -f1))" --size=fit --geometry=420x320+80+80 --text "Czy odtworzyć:
+<b>„$(basename {})”</b>" --text-align=center --button="Play!Nocturnal:0" --button="Wyjdź!shutdown-black:1" --buttons-layout=center && mpv {}'
+
+elif [[ $rc = 1 ]] ; then
+notify-send -t 30000 -i "/tmp/$title" "Ściągam audio" "$title";
+youtube-dl -c -x -o "$(xdg-user-dir MUSIC)/%(title)s.%(ext)s" --netrc --embed-thumbnail --add-metadata "$video" --exec 'yad --picture --undecorated --title "$(echo $(basename {} | cut -d. -f1))" --window-icon="/tmp/$(echo $(basename {} | cut -d. -f1))" --filename="/tmp/$(echo $(basename {} | cut -d. -f1))" --size=fit --geometry=420x320+80+80 --text "Czy odtworzyć:
+<b>„$(basename {})”</b>" --text-align=center --button="Play!Nocturnal:0" --button="Wyjdź!shutdown-black:1" --buttons-layout=center && mpv --profile=audio {}'
+
+elif [[ $rc = 2 || $rc = 252 ]] ; then
+notify-send -t 10000 -i "/tmp/$title" "$title" "Nie zostanie ściągnięte";
+rm "/tmp/$title";
+exit 0
+
+else
+notify-send -t 10000 -i "/tmp/$title" "$title" "Błąd!";
+fi
+
+
+#sleep 10
+rm "/tmp/$title";
+exit 0
+

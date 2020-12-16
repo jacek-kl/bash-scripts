@@ -1,0 +1,24 @@
+ <svg height="600" width="600"  viewbox="0 0 600 600">
+  <defs>
+    <radialGradient id="grad1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:rgb(0,0,0);stop-opacity:0" />
+      <stop offset="11%" style="stop-color:rgb(0,0,0);stop-opacity:0" />
+      <stop offset="11.4%" style="stop-color:rgb(127,127,127);stop-opacity:.5" />
+      <stop offset="11.8%" style="stop-color:rgb(160,160,160);stop-opacity:.7" />
+      <stop offset="12.2%" style="stop-color:rgb(127,127,127);stop-opacity:.5" />
+      <stop offset="12.7%" style="stop-color:rgb(127,127,127);stop-opacity:.5" />
+      <stop offset="13.1%" style="stop-color:rgb(160,160,160);stop-opacity:.7" />
+      <stop offset="13.5%" style="stop-color:rgb(127,127,127);stop-opacity:.5" />
+      <stop offset="15%" style="stop-color:rgb(127,127,127);stop-opacity:.5" />
+      <stop offset="15.5%" style="stop-color:rgb(160,160,160);stop-opacity:.7" />
+      <stop offset="16%" style="stop-color:rgb(127,127,127);stop-opacity:.5" />
+      <stop offset="21%" style="stop-color:rgb(127,127,127);stop-opacity:.5" />
+      <stop offset="22%" style="stop-color:rgb(255,255,255);stop-opacity:1" />
+      <stop offset="96.9%" style="stop-color:rgb(255,255,255);stop-opacity:1" />
+      <stop offset="99.9%" style="stop-color:rgb(0,0,0);stop-opacity:0" />
+    </radialGradient>
+  </defs>
+
+  <circle cx="50%" cy="50%" r="50%" stroke="none" fill="url(#grad1" />
+
+</svg> 

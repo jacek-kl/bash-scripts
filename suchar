@@ -1,0 +1,8 @@
+#!/bin/bash
+cat "$1" | sed '1 i\\n'| convert -size 485x -font Kalam -pointsize 22 -background transparent -fill "#fffcda" caption:@- -trim +repage -bordercolor transparent -border 15  /tmp/suchartemp1.png
+height=$(convert /tmp/suchartemp1.png -format "%h" info:)
+height=$((height + 50))
+convert /home/jacek/.local/share/images/dosuchara2.png -gravity South -crop 500x$height+0+0 /tmp/suchartemp2.png
+composite -compose Over /tmp/suchartemp1.png /tmp/suchartemp2.png -alpha set "$2"
+rm /tmp/suchartemp1.png /tmp/suchartemp2.png
+

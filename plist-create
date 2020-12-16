@@ -1,0 +1,21 @@
+#!/bin/bash
+find "$@" -name "*.wav" -o -name "*.ogg" -o -name "*.mp3" -o -name "*.aac" -o -name "*.flac" -o -name "*.m4a" -o -name "*.ape" -o -name "*.opus" -o -name "*.wma" -o -name "*.avi" -o -name "*.mp4" -o -name "*.mkv" -o -name "*.rmvb" | sort >> "$(xdg-user-dir DESKTOP)/${@##*/}.m3u"
+
+value=`gio info -a metadata::custom-icon-name "$@" | grep metadata | awk '{print $2}'`
+if [ $value ]; then
+gio set -t string "$(xdg-user-dir DESKTOP)/${@##*/}.m3u" metadata::custom-icon-name "$value"
+
+fi
+
+cust=`gio info -a metadata::custom-icon "$@" | egrep metadata | sed s#"  metadata::custom-icon: "##g`
+if [[ $cust ]]; then
+
+	if [[ $cust ==  "file:///"* ]]; then
+	custom="$cust"
+	else
+	custom="file://$@/$cust"
+	fi
+gio set -t string "$(xdg-user-dir DESKTOP)/${@##*/}.m3u"  metadata::custom-icon "$custom"
+
+fi
+

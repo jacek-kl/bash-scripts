@@ -1,0 +1,30 @@
+#!/bin/sh
+if [ -n "$(jack_lsp -c system:capture_2 | grep system:playback_)" ]
+  then
+jack_disconnect system:capture_1 system:playback_1
+jack_disconnect system:capture_2 system:playback_2
+fi
+
+if [ -z "$(pidof zita-rev1)" ]
+  then
+zita-rev1 -name "Reverb Z." &
+until wmctrl -l | egrep "Reverb Z."
+do
+sleep .1
+done
+jack_connect system:capture_1 "Reverb Z.":in.L
+jack_connect system:capture_2 "Reverb Z.":in.R
+jack_connect "Reverb Z.":out.L system:playback_1
+jack_connect "Reverb Z.":out.R system:playback_2
+wmctrl -r "Reverb Z." -e 0,158,0,-1,-1
+fi
+
+if ! pgrep -a meterbridge | egrep -q "system:capture_1 system:capture_2 system:monitor_1 system:monitor_2" ; then
+meterbridge -t dpm system:capture_1 system:capture_2 system:monitor_1 system:monitor_2 &
+fi
+until wmctrl -l | egrep "dpm bridge-"
+do
+sleep .1
+done
+wmctrl -ir $(wmctrl -lx | egrep "dpm bridge-" | awk '{print $1}') -e 0,0,0,-1,-1
+wmctrl -a "Reverb Z."

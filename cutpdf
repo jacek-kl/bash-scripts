@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+ plik=`zenity --file-selection \
+ --title="Wybierz plik"`
+else
+ plik="$@"
+fi
+
+cd "${plik%/*}"
+
+#plik="$@"
+coijak=$(yad --form --title="cut pdf" --window-icon="application-pdf" --image="application-pdf" --button="yad-cancel:0" \
+--field="Book":FL \
+--field="Nazwa":SFL \
+--field="Strony":CBE \
+--field="Zapisz":BTN \
+"$plik" "" "" 'bash -c "pdftk %1 cat %3 output %2.pdf"');
+
+exit 0

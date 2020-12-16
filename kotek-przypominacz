@@ -1,0 +1,44 @@
+#!/bin/bash
+sounddir="/home/jacek/Muza/dźwięki/"
+
+co=$(cat /home/jacek/.kotek-przypominacz-last | cut -d'	' -f1)
+kiedy=$(cat /home/jacek/.kotek-przypominacz-last | cut -d'	' -f2)
+dzwiek=$(cat /home/jacek/.kotek-przypominacz-last | cut -d'	' -f3)
+postac=$(cat /home/jacek/.kotek-przypominacz-last | cut -d'	' -f4)
+#echo "$co $kiedy $dzwiek $postac"
+
+wynik=$(yad --form --title="Kotek przypominacz" --center \
+--item-separator="	" \
+--image=$postac --window-icon=$postac \
+--field="O czym mam przypomnieć?":CBE \
+--field="Za ile minut?":SCL \
+--field="Jaki chcesz sygnał dźwiękowy?":CB \
+--field="Kotek czy krecik?":CB \
+"$co	🍞 Chlebek! 🍞	🍕 Wyłącz pizzę! 🍕	🍟 Frytki! 🍟	🍲 Wyłącz zupę! 🍲	🥔 Ziemniaczki! 🥔	Zamknij już okno!" \
+"$kiedy" \
+"$dzwiek	$(find $sounddir \( -name "*.wav" -o -name "*.ogg" -o -name "*.mp3" -o -name "*.amr" -o -name "*.aac" -o -name "*.mp4" -o -name "*.m4a" \) -type f -print0 | sed "s@$sounddir@@g" | sort -fz | python -c 'import sys; sys.stdout.write(sys.stdin.read().replace("\0", "\t"))')" \
+"$postac	remy	woman	pączuszek	jacek	krecik	kotek	homer" )
+
+if [ "$wynik" = "" ] ; then
+exit 0
+fi
+
+co=$(echo "$wynik" | cut -d'|' -f1)
+kiedy=$(echo "$wynik" | cut -d'|' -f2)
+dzwiek=$(echo "$wynik" | cut -d'|' -f3)
+postac=$(echo "$wynik" | cut -d'|' -f4)
+
+#echo "DISPLAY=:0 milena_say -E UTF-8 "\"$co\""; play -q "\"$sounddir/$dzwiek\""" | at now + $kiedy minutes;
+#echo "DISPLAY=:0 play -q "\"$sounddir/$dzwiek\""; milena_say -E UTF-8 "\"$co\""; play -q "\"$sounddir/$dzwiek\""" | at now + $kiedy minutes;
+
+echo "DISPLAY=:0 play -q "\"$sounddir/$dzwiek\""; milena_say -E UTF-8 "\"$co\""" | at now + $kiedy minutes;
+echo "DISPLAY=:0 $postac -t 0 "\"$co\"" && pkill play" | at now + $kiedy minutes;
+
+
+#echo "DISPLAY=:0 milena_say -E UTF-8 "\"$co\""" | at now + $kiedy minutes;
+#echo "DISPLAY=:0 $postac -t 0 "\"$co\"" && pkill play" | at now + $kiedy minutes;
+
+
+$postac -t 5 " przypomnienie ustawione na godzinę $(atq | sort -n | tail -n 1 | awk '{print $5}')"
+echo "$co	$kiedy	$dzwiek	$postac"> /home/jacek/.kotek-przypominacz-last
+exit 0

@@ -1,0 +1,112 @@
+#!/bin/bash
+
+#############################################             zapisz-i-zakoncz()            ##########################################################
+zapisz-i-zakoncz() {
+#################################        	bug w yadzie…	############################
+#coigdzie=`yad --form --title="Zapisz i zakończ" --center --window-icon=shutdown-green \
+#--width=150 --height=50 --undecorated --center --on-top --close-on-unfocus \
+#--field="gdzie":FL --field="i co":CB \
+#"/home/jacek/" "suspend!hibernate!hybrid-sleep!poweroff!reboot"`
+#	if [ "$coigdzie" = "" ] ; then
+#	exit 0
+#	fi
+#gdzie=$(echo "$coigdzie" | cut -d'|' -f1)
+#ico=$(echo "$coigdzie" | cut -d'|' -f2)
+######################################		koniec yad --form		####################
+######################################		znaczy : bug in yad		####################
+########################################################################################
+######################################		walkaround		############################
+######################################		yad po kolei	############################
+########     	Gdzie? - czyli który folder obserwujemy				####################
+gdzie=`yad --file --directory ./`
+######	jeśli bez reakcji	######
+if [ "$gdzie" = "" ] ; then
+###### 		Adieu!			######
+exit 0
+fi
+#	przechodzimy do „$gdzie”	#
+cd "$gdzie"
+#######     i co?	-	czyli: „co robimy gdy ruch ustanie?			####################
+#######		niech komputerek zapyta yad'em i ustawi czynność		####################
+i_co=`yad --list --title="co potem" \
+--column="polecenie":TEXT --no-headers --separator="
+" --width=200 --height=390 --window-icon=shutdown-green \
+--timeout=20 --timeout-indicator=bottom \
+--no-buttons --undecorated --center --on-top --close-on-unfocus \
+"suspend" "hibernate" "hybrid-sleep" "poweroff" "reboot"`
+
+if [ "$i_co" = "" ] ; then
+######	jeśli bez reakcji	-	Adieu!	######
+exit 0
+fi
+
+###############		wrzuć coś na ekran		#############
+notify-send -i shutdown-green "po zakończeniu" "w katalogu\n„$gdzie”\n\nbędzie wykonane polecenie:\n„systemctl $i_co”"
+############		koniec yad po kolei		#############
+
+
+###############		sprawdzaj		######################
+###############		a = zawartość katalogu teraz			######
+a=`du -s | cut -f1`
+###############		policz do sześciuset					######
+sleep 5m
+###############		b = zawartość katalogu 5 minut później	######
+b=`du -s | cut -f1`
+###############				porównujemy „a” i „b”			######
+###############				jeśli coś przybywa				######
+while [ $a != $b ]; do 
+###############		zmieniamy wartość odniesienia „a” na obecną	##
+a=$b;
+###############			i znów odliczamy (600)				######
+sleep 5m;
+b=`du -s | cut -f1`;
+done
+###############		loop się zakończył, bo nic nie przybywa	######
+###############		Więc uruchamiamy wcześniej ustawione „$i_co” #
+case $i_co in
+	reboot) systemctl reboot ;;
+	suspend) systemctl suspend ;;
+	hibernate) systemctl hibernate ;;
+	hybrid-sleep) systemctl hybrid-sleep ;;
+	poweroff) systemctl poweroff ;;
+	*) exit 0 ;;
+esac
+}
+##############################################################	koniec funkcji zapisz i zakończ	####################################################
+
+
+##############################################################				MAIN				####################################################
+
+command=`yad --image=/home/jacek/Obrazy/natura/atermlas-sml.jpg --list --borders=0 --title="Jak wyłączyć?" \
+--column="ikona":IMG --column="polecenie":TEXT --no-headers --separator="
+" --width=255 --height=255 --window-icon=shutdown-green \
+--timeout=20 --timeout-indicator=bottom \
+--no-buttons --undecorated --center --on-top --close-on-unfocus --print-column=2 \
+tv "zgaś monitor" sennik "electricsheep" jacek "wyloguj" om "uśpij kompa" \
+redo "uruchom ponownie" notebook "wyłącz komputer" download "zapisz i zakończ" \
+electricsheep18467 "e-sheep na pulpicie" editor "edytuj"`
+
+# kotek "halt" krecik "halt (systemctl)" # kotek "poweroff (systemctl)" # krecik "suspend (systemctl)" kotek "hibernate (systemctl)" krecik "hybrid-sleep (systemctl)" \# redo "reboot (systemctl)" 
+
+#echo "$command"
+#exit 0
+case $command in
+	"	") exit 0 ;;
+	wyloguj) mate-session-save --force-logout ;;
+	"uruchom ponownie") systemctl reboot ;;
+	"reboot (systemctl)") systemctl reboot ;;
+	"uśpij kompa") systemctl suspend ;;
+	"hibernate (systemctl)") systemctl hibernate ;;
+	"hybrid-sleep (systemctl)") systemctl hybrid-sleep ;;
+	"wyłącz komputer") poweroff ;;
+	"poweroff (systemctl)") systemctl poweroff ;;
+	halt) halt ;;
+	"halt (systemctl)") systemctl halt ;;
+	"zapisz i zakończ") zapisz-i-zakoncz ;;
+	"zgaś monitor") sleep 0.2 && xset dpms force off ;;
+#	"wygaszacz") sleep 0.2 && xscreensaver-command -activate;;
+	"electricsheep") electricsheep &;;
+    "e-sheep na pulpicie") wallpaper-esheep &;;
+	"edytuj") pluma $0 &;;
+esac
+exit 0

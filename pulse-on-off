@@ -1,0 +1,14 @@
+#!/bin/sh
+if [ -z "$(pidof pulseaudio)" ]
+then
+sed -i 's/autospawn = no/autospawn = yes/g' ~/.config/pulse/client.conf ;
+pulseaudio --start --load module-jack-sink --load module-jack-source &
+sed -i 's/Icon=no-pulseaudio/Icon=pulseaudio/g' ~/Pulpit/pulse.desktop ;
+sed -i 's/Name=Włącz PulseAudio/Name=Wy(po)łącz PulseAudio/g' ~/Pulpit/pulse.desktop ;
+else
+sed -i 's/autospawn = yes/autospawn = no"/g' ~/.config/pulse/client.conf ;
+pulseaudio --kill ;
+sed -i 's/Icon=pulseaudio/Icon=no-pulseaudio/g' ~/Pulpit/pulse.desktop ;
+sed -i 's/Name=Wy(po)łącz PulseAudio/Name=Włącz PulseAudio/g' ~/Pulpit/pulse.desktop ;
+fi
+# grep -Fxq "autospawn = no" ~/.config/pulse/client.conf && 

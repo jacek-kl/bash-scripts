@@ -1,0 +1,30 @@
+#!/bin/bash
+SINK="$(pacmd list-sinks | awk '/* index: [0-9]+/{ print $3 }')"
+
+# current volume snippet taken
+# from pulseaudio-ctl <https://github.com/graysky2/pulseaudio-ctl>
+# by graysky <graysky@archlinux.us>, licensed under MIT
+CURVOL="$(pacmd list-sinks | grep -A 15 '* index' | awk '/volume: /{ print $3 }' | grep -m 1 % | sed 's/[%|,]//g')"
+[ -n "$CURVOL" ] || CURVOL="$(pacmd list-sinks | grep -A 15 '* index' | awk '/volume: front/{ print $5 }' | sed 's/[%|,]//g')"
+[ -n "$CURVOL" ] || CURVOL=100
+
+printf "Current volume: %3d%%\n" "$CURVOL"
+printf "\rVolume: %3d%%" "$CURVOL"
+pactl set-sink-volume "$SINK" "$CURVOL%"
+
+zenity --scale --print-partial \
+    --title="PulseAudio Volume" \
+    --text="Set volume to..." \
+    --window-icon=/usr/share/icons/gnome/256x256/status/audio-volume-high.png \
+    --min-value=0 --max-value=500 \
+    --value="$CURVOL" 2> /dev/null | \
+while read VOL; do
+    printf "\rVolume: %3d%%" "$VOL"
+    pactl set-sink-volume "$SINK" "$VOL%"
+done
+
+if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+    printf "\nReset volume: %3d%%" "$CURVOL"
+    pactl set-sink-volume "$SINK" "$CURVOL%"
+fi
+echo

@@ -1,0 +1,27 @@
+#!/bin/bash
+# get files
+cd "$@"
+files=(*)
+# find out random one
+n="${#files[@]}"
+plik="${files[RANDOM % n]}"
+
+if [[ $plik == *.desktop ]]; then
+ if  grep -Fxq "Type=Link" "$plik" ; then
+ xdg-open "$(grep '^URL=' "$plik" | tail -1 | sed 's/^URL=//' | sed 's/%.//')"
+
+ elif grep -Fxq "Type=Application" "$plik" ; then
+ co=$(grep '^Exec' "$plik" | tail -1 | sed 's/^Exec=//' | sed 's/%.//')
+   if grep -Fxq "Terminal=true" "$plik" ; then
+   mate-terminal -e "$co"
+   else
+   bash -c "$co"
+   fi
+
+ else echo błąd
+ fi
+
+else
+xdg-open "$plik"
+fi
+exit

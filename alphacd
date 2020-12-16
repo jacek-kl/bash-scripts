@@ -1,0 +1,41 @@
+#!/bin/bash
+
+res=/home/jacek/bin/alpha-res/cd/
+tmp=/tmp/$RANDOM/
+
+mkdir -p $tmp
+
+output="${@%.*}.png"
+if [ -f "$output" ]; then
+  output="${@%.*}-cd.png"
+fi
+
+width=$(convert "$@" -format "%w" info:)
+height=$(convert "$@" -format "%h" info:)
+
+convert "$@" -resize x100 ${tmp}th.png
+convert ${tmp}th.png ${tmp}th.png ${tmp}th.png ${tmp}th.png +append ${tmp}strip.png
+
+if [ $width -ne $height ]; then
+    convert ${res}masks.png -resize $(convert ${tmp}strip.png -format "%w" info:)x100\! \
+    ${tmp}stripmask.png
+else
+    cp ${res}masks.png ${tmp}stripmask.png
+fi
+
+convert ${tmp}strip.png ${tmp}stripmask.png \
+-alpha off -compose CopyOpacity -composite ${tmp}preview.png
+
+mask=$(yad --image=${tmp}preview.png --window-icon="cd" --title="Wybór szablonu" \
+--scale --min-value=1 --value=4 --max-value=4)
+if [ -z $mask ]; then
+    exit
+    rm -r ${tmp}
+fi
+
+#convert ${res}cdmask${mask}.svg -resize ${width}x${height}\! ${tmp}cdmasktemp.png
+rsvg-convert -w ${width} -h ${height} -f png -b black \
+ -o ${tmp}cdmasktemp.png ${res}cdmask${mask}.svg
+convert "$@" ${tmp}cdmasktemp.png -alpha off -compose CopyOpacity -composite "$output"
+
+rm -r ${tmp}

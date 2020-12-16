@@ -1,0 +1,59 @@
+#!/bin/bash
+pulpit=$(xdg-user-dir DESKTOP)
+
+seticonon(){
+  sed -i 's/Icon=no-pulseaudio/Icon=pulseaudio/g' $pulpit/pulse.desktop ;
+  sed -i 's/Name=Włącz PulseAudio/Name=Wy(po)łącz PulseAudio/g' $pulpit/pulse.desktop ;
+}
+
+seticonoff(){
+  sed -i 's/Icon=pulseaudio/Icon=no-pulseaudio/g' $pulpit/pulse.desktop ;
+  sed -i 's/Name=Wy(po)łącz PulseAudio/Name=Włącz PulseAudio/g' $pulpit/pulse.desktop ;
+}
+
+check(){
+if [ -z "$(pidof pulseaudio)" ]; then
+  export pulsestat=off
+  seticonoff
+else
+  export pulsestat=on
+  seticonon
+fi
+}
+
+pulseon(){
+  sed -i 's/autospawn = no/autospawn = yes/g' ~/.config/pulse/client.conf ;
+  #pulseaudio --start --load module-jack-sink --load module-jack-source &
+  pulseaudio --start &
+  #systemctl --user start pulseaudio.socket
+  #systemctl --user unmask pulseaudio.socket  #alternatywnie
+  #systemctl --user start pulseaudio.service
+  sleep .2 && check
+}
+
+pulseoff(){
+  sed -i 's/autospawn = yes/autospawn = no/g' ~/.config/pulse/client.conf ;
+  pulseaudio --kill ;
+  #systemctl --user stop pulseaudio.socket
+  #systemctl --user mask pulseaudio.socket  #alternatywnie
+  #systemctl --user stop pulseaudio.service
+  sleep .2 && check
+}
+
+cycle(){
+check
+if [ $pulsestat == off ]; then
+  pulseon
+else
+  pulseoff
+fi
+}
+
+case $@ in
+on ) pulseon ;;
+off ) pulseoff ;;
+check ) check ;;
+cycle ) cycle ;;
+*) cycle ;;
+esac
+

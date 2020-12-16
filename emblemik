@@ -1,0 +1,19 @@
+#!/bin/bash
+emblem=`gio info -a metadata::emblems "$@" | egrep metadata | awk '{ print substr($0, index($0,$2)) }' | sed 's/\]//g' | sed 's/\[//g' | sed 's/,//g'`
+
+
+wynik=`yad --entry --title "Emblem" --width "200" --center --entry-text="$emblem"`
+rc=$?
+
+if [ $rc = 0 ] ; then
+	emblem=$(echo "$wynik")
+#echo $emblem
+#exit 0
+	if [ ! $emblem ]; then
+		gio set -t unset "$@" metadata::emblems
+	else
+		gio set -t stringv "$@" metadata::emblems $emblem
+	fi
+
+#	xdotool key F5
+fi

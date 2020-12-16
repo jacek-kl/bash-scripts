@@ -1,0 +1,20 @@
+#!/bin/bash
+if [ $# -eq 0 ]; then
+FILE=`zenity --file-selection  --title="Wybierz plik"`
+else
+FILE=$1
+fi
+
+height=$(convert "$FILE" -format "%h" info:)
+width=$(convert "$FILE" -format "%w" info:)
+
+if [ $# -eq 2 ]; then
+ile=$2
+else
+ile=`yad --scale --title="Ile obciąć?" --value=36 --width=400`
+fi
+
+height=$((height - ile))
+
+jpegtran -crop ${with}x${height}+0+0 -outfile "${FILE%.*}-croped.jpg" "$FILE"
+

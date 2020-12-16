@@ -1,0 +1,9 @@
+#!/bin/sh
+for arg
+do
+	while [[ "`pidof -x tesseract -o %PPID`" ]];
+	do
+		sleep .5
+	done
+	tesseract -l pol "$arg"  "${arg%.*}" quiet
+done

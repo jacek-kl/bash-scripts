@@ -1,0 +1,12 @@
+#!/bin/bash
+cd /home/jacek/Obrazy/screenshots
+
+
+yad --form --title="błysk" --window-icon="camera" --button="gtk-close:0" \
+--field="pstryknij!camera-web":FBTN \
+--field="zdjęcia!cannabis":FBTN \
+--field="ostatnie!jacek":FBTN \
+--field="folder!folder":FBTN \
+--field="lusterko!accessories-text-editor":FBTN \
+--field="Interaktywny!applets-screenshooter":FBTN \
+'camshot' 'sh -c "ls -1 -c | grep .png | feh -F -Z -f -"' 'sh -c "ls -1 -c | grep .png | head -n 1 | feh -F -Z -f -"' 'nautilus .' 'mpv tv:// -tv driver=v4l2:width=1280:height=720 -vf scale,screenshot,mirror -vo gl' 'gnome-screenshot --interactive'

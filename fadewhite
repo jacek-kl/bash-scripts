@@ -1,0 +1,28 @@
+#!/bin/bash
+randir=/tmp/$RANDOM$RANDOM
+mkdir $randir
+if [ $# -ne 1 ]; then
+FILE=`zenity --file-selection  --title="Wybierz plik"`
+else
+FILE=$@
+fi
+convert "$FILE" -alpha copy -channel alpha -negate -trim +repage "$randir/fade-white.png" && pqiv -P "0,0" --action="set_scale_mode_fit_px(320, 320)" --lazy-load --wait-for-images-to-appear --end-of-files-action=wait --watch-directories "$randir/" &
+pid=$!
+
+yad --scale --undecorated --image-on-top --step=1 --geometry=1000x100+0+320 \
+--on-top --title "Alpha" --image=imagemagick --button=yad-ok \
+--window-icon=imagemagick --max-value=200 --value=100 --print-partial --text="nie przesuwaj tylko klikaj, bo pqiv jest durny" 2>/dev/null |
+while read alpha
+do
+convert "$FILE" -alpha copy -channel alpha -negate -evaluate Multiply $(echo $alpha/100 | bc -l ) -trim +repage "$randir/fade-white.png"
+done
+
+plikin="${FILE%.*}.png"
+
+plikout=$(zenity --file-selection --title "Zapisz jako…" \
+--filename="$plikin" --save --confirm-overwrite 2>/dev/null )
+
+pkill -P $pid && mv "$randir/fade-white.png" "$plikout" 2>/dev/null
+rm -R "$randir" 2>/dev/null
+sleep .1
+#exit 0

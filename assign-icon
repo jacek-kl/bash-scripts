@@ -1,0 +1,23 @@
+#!/bin/bash
+
+
+
+gdzie=`realpath "$@"`
+
+{ while read -r d ; do [ -d "$d" ] && [ -e "$d/.folder.svg" ] && [[ -z $(gio info -a metadata::custom-icon "$d" | egrep metadata::custom-icon) ]] || continue ; gio set -t string "$d" metadata::custom-icon ".folder.svg" ; done ; } < <(find "$gdzie" -type d)
+
+{ while read -r d ; do [ -d "$d" ] && [ -e "$d/.folder.png" ] && [[ -z $(gio info -a metadata::custom-icon "$d" | egrep metadata::custom-icon) ]] || continue ; gio set -t string "$d" metadata::custom-icon ".folder.png" ; done ; } < <(find "$gdzie" -type d)
+
+{ while read -r d ; do [ -d "$d" ] && [ -e "$d/.folder.gif" ] && [[ -z $(gio info -a metadata::custom-icon "$d" | egrep metadata::custom-icon) ]] || continue ; gio set -t string "$d" metadata::custom-icon ".folder.gif" ; done ; } < <(find "$gdzie" -type d)
+
+{ while read -r d ; do [ -d "$d" ] && [ -e "$d/.folder.jpg" ] && [[ -z $(gio info -a metadata::custom-icon "$d" | egrep metadata::custom-icon) ]] || continue ; gio set -t string "$d" metadata::custom-icon ".folder.jpg" ; done ; } < <(find "$gdzie" -type d)
+
+{ while read -r d ; do [ -d "$d" ] && [ -e "$d/folder.svg" ] && [[ -z $(gio info -a metadata::custom-icon "$d" | egrep metadata::custom-icon) ]] || continue ; gio set -t string "$d" metadata::custom-icon "folder.svg" ; done ; } < <(find "$gdzie" -type d)
+
+{ while read -r d ; do [ -d "$d" ] && [ -e "$d/folder.png" ] && [[ -z $(gio info -a metadata::custom-icon "$d" | egrep metadata::custom-icon) ]] || continue ; gio set -t string "$d" metadata::custom-icon "folder.png" ; done ; } < <(find "$gdzie" -type d)
+{ while read -r d ; do [ -d "$d" ] && [ -e "$d/folder.jpg" ] && [[ -z $(gio info -a metadata::custom-icon "$d" | egrep metadata::custom-icon) ]] || continue ; gio set -t string "$d" metadata::custom-icon "folder.jpg" ; done ; } < <(find "$gdzie" -type d)
+{ while read -r d ; do [ -d "$d" ] && [ -e "$d/cover.png" ] && [[ -z $(gio info -a metadata::custom-icon "$d" | egrep metadata::custom-icon) ]] || continue ; gio set -t string "$d" metadata::custom-icon "cover.png" ; done ; } < <(find "$gdzie" -type d)
+{ while read -r d ; do [ -d "$d" ] && [ -e "$d/cover.jpg" ] && [[ -z $(gio info -a metadata::custom-icon "$d" | egrep metadata::custom-icon) ]] || continue ; gio set -t string "$d" metadata::custom-icon "cover.jpg" ; done ; } < <(find "$gdzie" -type d)
+
+# { while read -r d ; do [ -d "$d" ] ; gio set -t stringv "$d" metadata::emblems isfolder ; done ; } < <(find "$gdzie" -type d)
+{ while read -r d ; do [ -d "$d" ] ; gio set -t unset "$d" metadata::emblems isfolder ; done ; } < <(find "$gdzie" -type d)

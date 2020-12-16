@@ -1,0 +1,30 @@
+#!/bin/bash
+if [ $# -ne 1 ]; then
+FILE=`zenity --file-selection  --title="Wybierz plik"`
+else
+FILE=$@
+fi
+
+convert "$FILE" -fuzz 42% -transparent white -trim +repage "/tmp/wycina-biały.png" && feh -Tnofull -R 2 -B black -g 320x320 "/tmp/wycina-biały.png" 2>/dev/null &
+
+
+#zenity --scale --title "Fuzziness" --text="" --step=1 --value=42 --print-partial \
+#--window-icon=/home/jacek/.local/share/icons/hicolor/48x48/apps/krecik.png 2>/dev/null |
+
+yad --scale --undecorated --image-on-top --step=1 --geometry=1000x100+0+320 \
+--on-top --title "Fuzziness" --image=imagemagick --button=yad-ok \
+--window-icon=imagemagick --min-value=0 --value=42 --print-partial  2>/dev/null |
+while read fuzz
+do
+convert "$FILE" -fuzz $fuzz% -transparent white -trim +repage "/tmp/wycina-biały.png"
+done
+
+plikin="${FILE%.*}.png"
+#plikout=$(yad --file --on-top --title "Zapisz jako…" --window-icon=krecik \
+#--filename="$plikin" --save --confirm-overwrite="Czy na pewno chcesz zastąpić ten plik?" 2>/dev/null )
+plikout=$(zenity --file-selection --title "Zapisz jako…" \
+--filename="$plikin" --save --confirm-overwrite 2>/dev/null )
+
+mv "/tmp/wycina-biały.png" "$plikout" 2>/dev/null
+rm "/tmp/wycina-biały.png" 2>/dev/null 
+exit 0

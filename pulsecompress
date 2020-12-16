@@ -1,0 +1,17 @@
+#!/usr/bin/bash
+pid=$(pgrep -a jack-rack | grep "jack-rack -s compressor /home/jacek/Muza/settings/compressor" | awk '{print $1}')
+if [ $pid ]
+then
+  jack_connect "PulseAudio JACK Sink:front-left" system:playback_1
+  jack_connect "PulseAudio JACK Sink:front-right" system:playback_2
+  kill -s 3 $pid
+else
+  exec jack-rack -s 'compressor' '/home/jacek/Muza/settings/compressor' &
+  sleep 1
+  jack_connect "PulseAudio JACK Sink:front-left" jack_rack_compressor:in_1
+  jack_connect "PulseAudio JACK Sink:front-right" jack_rack_compressor:in_2
+  jack_connect jack_rack_compressor:out_1 system:playback_1
+  jack_connect jack_rack_compressor:out_2 system:playback_2
+  jack_disconnect "PulseAudio JACK Sink:front-left" system:playback_1
+  jack_disconnect "PulseAudio JACK Sink:front-right" system:playback_2
+fi

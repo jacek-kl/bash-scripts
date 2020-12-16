@@ -1,0 +1,14 @@
+#!/bin/bash
+yellow='\033[1;33m'
+pushd "$@" > /dev/null
+printf "\033]0;szukam…\007"
+echo -e "${yellow}wpisz szukaną frazę"
+read -r;
+printf "\033]0;wyniki dla: ${REPLY}\007"
+find ./ -type f -print0 | sort -n -z | xargs -0 grep --color -iF  -e "${REPLY}"
+echo -e "${yellow}Przyciśnij dowolny klawisz..."
+read -rsp $'' -n 1 key
+popd > /dev/null
+#searchterm=$(yad --center --borders=10 --image=search --entry --text "Co wyszukać?" --title "Szukaj w plikach" 2> /dev/null)
+#ESC[ 38;2;⟨r⟩;⟨g⟩;⟨b⟩ m Select RGB foreground color
+#ESC[ 48;2;⟨r⟩;⟨g⟩;⟨b⟩ m Select RGB background color

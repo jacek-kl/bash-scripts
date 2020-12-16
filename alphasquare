@@ -1,0 +1,43 @@
+#!/bin/bash
+
+res=/home/jacek/bin/alpha-res/squares/
+tmp=/tmp/$RANDOM/
+
+mkdir -p $tmp
+
+output="${@%.*}.png"
+if [ -f "$output" ]; then
+  output="${@%.*}-square.png"
+fi
+
+width=$(convert "$@" -format "%w" info:)
+height=$(convert "$@" -format "%h" info:)
+
+convert "$@" -resize x100 ${tmp}th.png
+convert ${tmp}th.png ${tmp}th.png ${tmp}th.png ${tmp}th.png ${tmp}th.png \
+    ${tmp}th.png ${tmp}th.png ${tmp}th.png +append ${tmp}strip.png
+
+if [ $width -ne $height ]; then
+    convert ${res}squares.png -resize $(convert ${tmp}strip.png -format "%w" \
+        info:)x100\! \
+    ${tmp}stripmask.png
+else
+    cp ${res}squares.png ${tmp}stripmask.png
+fi
+
+convert ${tmp}strip.png ${tmp}stripmask.png \
+-alpha off -compose CopyOpacity -composite ${tmp}preview.png
+
+number=$(yad --image=${tmp}preview.png --window-icon="flare003" --title="Wybór szablonu" \
+--scale --min-value=1 --value=7 --max-value=8)
+if [ -z $number ]; then
+    exit
+    rm -r ${tmp}
+fi
+
+convert ${res}square${number}.png -resize ${width}x${height}\! ${tmp}squaretemp.png
+#rsvg-convert -w ${width} -h ${height} -f png -b black \
+# -o ${tmp}squaretemp.png ${res}square${number}.svg
+convert "$@" ${tmp}squaretemp.png -alpha off -compose CopyOpacity -composite "$output"
+
+rm -r ${tmp}

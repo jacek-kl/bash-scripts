@@ -1,0 +1,5 @@
+#!/bin/bash
+for f in cdmask?.svg; do rsvg-convert -b black -f png -o ${f%.*}.png $f; done
+convert cdmask?.png +append maskstemp.png
+convert maskstemp.png -resize 400x100 masks.png
+rm maskstemp.png

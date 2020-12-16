@@ -1,0 +1,29 @@
+#!/bin/bash
+yad --form --title="Music Studio" --window-icon="strat" \
+--no-buttons --posy=-2 --undecorated --borders=0 \
+--field="      Cadence!cadence":FBTN \
+--field="        Catia!catia":FBTN \
+--field="Timidity Jack!timidity":FBTN \
+--field="    Jack Rack!jack-rack-icon":FBTN \
+--field="    Rakarrack!strat2":FBTN \
+--field="     Guitarix!gx_head":FBTN \
+--field=" SooperLooper!slgui":FBTN \
+--field="      gitara0!strat":FBTN \
+--field="       reverb!strat":FBTN \
+--field="         rec.!media-record":FBTN \
+--field="    killTimid!timidity":FBTN \
+--field="  Meterbridge!/usr/share/meterbridge/vu-frame-small.png":FBTN \
+--field="  Jack Mixer!jack_mixer":FBTN \
+--field="       Lingot!lingot":FBTN \
+--field="JACK settings!cadence":FBTN \
+--field="    JACK logs!cadence":FBTN \
+--field="       edytuj!accessories-text-editor":FBTN \
+--field="       Zamknij!gtk-close":FBTN \
+'cadence' 'catia' \
+'timidity -B2,8  -Oj -s 44100 -iA --realtime-priority=99 -EFreverb=0 -EFchorus=0' \
+'jack-rack' 'rakarrack' 'guitarix' 'slgui' \
+'gitara0' 'reverb' 'gtk-launch rec.' 'killall timidity' \
+'meterbridge -c 4 -t dpm system:capture_1 system:capture_2 system:monitor_1 system:monitor_2' \
+'jack_mixer -c .jackrack/mixer1' 'lingot' 'cadence-jacksettings' 'cadence-logs' "pluma $0" 'bash -c "kill -USR1 $YAD_PID"'
+
+#'claudia' 'claudia-launcher' --field="      Claudia!claudia":FBTN \--field="  ClaudLaunch!claudia":FBTN \

@@ -1,0 +1,16 @@
+#!/bin/sh
+# manview
+#man "$@" > /tmp/"$@".man
+#pluma /tmp/"$@".man
+rm -fr /tmp/hman*
+man -H "$@" 2>/dev/null
+html=$(find /tmp/hman*/*.html 2>/dev/null)
+if [[ $html ]]; then
+cat $html | sed "s/&minus;/-/g; s/&rsquo;/\'/g; s/−/-/g; s/’/\'/g" > /tmp/$@.html
+firefox /tmp/$@.html &
+else
+notify-send -i face-crying "nie znaleziono manuala dla $@"
+fi
+
+#man -P cat "$1" | col -b > "/tmp/$1"
+#firefox "/tmp/$1"

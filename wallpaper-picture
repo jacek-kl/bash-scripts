@@ -1,0 +1,65 @@
+#!/bin/bash
+
+cfile=/home/jacek/Obrazy/tła/default
+
+newwall(){
+notify-send -i "$newpic" "ustawiam tymczasowo „`basename "$newpic"`”" "jeśli chcesz na stałe - usuń plik: „$cfile”" -h string:x-canonical-private-synchronous:wallpaper
+dconf write /org/mate/desktop/background/picture-filename "'$newpic'"
+wybieraj
+}
+
+backpic(){
+dconf read /org/mate/desktop/background/picture-filename > "$cfile" &&
+sed -i s/\'//g "$cfile"
+}
+
+ustaw(){
+pictopt=$( zenity --width=60 --height=260 --list --title "wallpaper" --text "ustaw na ekranie" --hide-header \
+--column "wartość" --column "..po polsku.." \
+"none" "❀❀❀	  wyłącz	❀❀❀" \
+"wallpaper" "❀❀❀	 tapetuj	❀❀❀" \
+"centered" "❀❀❀	 środkuj	❀❀❀" \
+"scaled" "❀❀❀	  skaluj	❀❀❀" \
+"stretched" "❀❀❀	rozciągnij	❀❀❀" \
+"zoom" "❀❀❀	 przybliż	❀❀❀" \
+"spanned" "❀❀❀	 dopasuj	❀❀❀")
+if [ -z $pictopt ] ; then exit 0 ; fi
+}
+
+wybieraj(){
+ustaw
+until [ -z $pictopt ]
+do
+# gsettings set org.gnome.desktop.background picture-options "$pictopt"
+dconf write /org/mate/desktop/background/picture-options "'$pictopt'"
+ustaw
+done
+}
+
+if [ $# -ne 1 ]; then
+#nie podano ścieżki
+  if [ -f $cfile ]; then
+    # ale jest …default”
+    default=`cat $cfile`
+    notify-send -i "$default" przywracam `basename "$default"` -h string:x-canonical-private-synchronous:wallpaper
+    dconf write /org/mate/desktop/background/picture-filename "'$default'" && rm "$cfile"
+    wybieraj
+  else
+    # nie ma też „default”
+    newpic=`zenity --file-selection  --title="Wybierz plik"`
+    backpic
+    newwall
+  fi
+else
+# jest podana ścieżka
+  newpic=$@
+  if [ -f $cfile ]; then
+  # ale też jest …default”
+    newwall
+  else
+  # nie ma „default”
+    backpic
+    newwall
+  fi
+fi
+

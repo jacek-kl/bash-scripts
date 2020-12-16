@@ -1,0 +1,44 @@
+#!/bin/bash
+
+vars=$(yad --form --title="webp konwerter" --window-icon="obrazek" --center \
+--field="preset":CB \
+--field="szerokość":NUM \
+--field="wysokość":NUM \
+--field="jakość":SCL \
+--field="zamienić ⁈":CHK \
+--field="lossless ⁈":CHK \
+"default!photo!picture!drawing!icon!text" "0!0..2048!8" "0!0..2048!8" 85 false false)
+    [ "$?" = 1 ] && exit 1
+preset=$(echo "$vars" | awk -F\| '{print $1}')
+width=$(echo "$vars" | awk -F\| '{print $2}')
+height=$(echo "$vars" | awk -F\| '{print $3}')
+quality=$(echo "$vars" | awk -F\| '{print $4}')
+losless=$(echo "$vars" | awk -F\| '{print $6}')
+
+if [ $width == "0" ] && [ $height == "0" ];then
+    ifresize=
+    width=
+    height=
+else
+    ifresize="-resize"
+fi
+
+if [ `echo "$vars" | awk -F\| '{print $6}'` == TRUE ]; then
+    args="-z 9"
+else
+    args="-q $quality"
+fi
+
+for file in "$@"
+do
+    if [ `echo "$vars" | awk -F\| '{print $5}'` == TRUE ]; then
+        newname="$file"
+    else
+        newname="${file%.*}.webp"
+        if [ -f "$newname" ]; then
+            newname="${file%.*}-$(date '+%Y.%m.%d %H.%M.%S').webp"
+        fi
+    fi
+    cwebp -preset $preset $args $ifresize $width $height "$file" -o "$newname";
+done
+

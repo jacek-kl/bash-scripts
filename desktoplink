@@ -1,0 +1,42 @@
+#!/bin/bash
+#echo "zostałem wywołany desktop to: $(xdg-user-dir DESKTOP)" >/home/jacek/Desktop/log
+
+if [ -d "$@" ];then
+    cd "$@"
+fi
+
+s=${@##*/}
+desklnk=`echo "$(xdg-user-dir DESKTOP)/${s%.*}.desktop"`
+#desklnk="/home/jacek/Desktop/${s%.*}.desktop"
+custom=`gio info -a metadata::custom-icon "$@" | egrep metadata | sed s#"  metadata::custom-icon: "##g`
+thumbnail=`gio info -a thumbnail::path "$@" | egrep thumbnail  | sed s#"  thumbnail::path: "##g`
+named=`gio info -a metadata::custom-icon-name "$@" | grep metadata | awk '{print $2}'`
+	if [[ $custom ]]; then
+      #decodeURL() {
+        #   printf "$(sed 's#^file://##;s/+/ /g;s/%\(..\)/\\x\1/g;' <<< "$custom")";
+      #}
+      #	icon=`decodeURL`
+      icon=`realpath $custom`
+    elif [[ $named ]]; then
+      icon="$named"
+	elif [[ $thumbnail ]]; then
+	icon="$thumbnail"
+	else
+	icon=jacek
+	fi
+echo $icon
+
+cat <<EOF > "$desklnk"
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Name=${s%.*}
+Comment=$@
+Icon=$icon
+URL=$@
+Type=Link
+EOF
+
+gio set "$desklnk" metadata::trusted yes
+chown "$whoami" "$desklnk"
+chmod +x "$desklnk"

@@ -1,0 +1,46 @@
+#!/bin/sh
+pulpit=$(xdg-user-dir DESKTOP)
+
+if [[ "`pidof -x $(basename $0) -o %PPID`" ]]; then
+    notify-send -i a³ aero² "is off" -h string:x-canonical-private-synchronous:aero2;
+    sed -i 's/²/³/g' $pulpit/aero2.desktop ;
+	kill `pidof -x $(basename $0) -o %PPID`
+	exit
+fi
+    notify-send -i a² aero² "is on" -h string:x-canonical-private-synchronous:aero2;
+    sed -i 's/³/²/g' $pulpit/aero2.desktop ;
+
+while :
+do
+  until nc -w 5 -z bdi.free.aero2.net.pl 8080
+  do
+    notify-send -i a³ aero² "no aero² connection!" \
+    -h string:x-canonical-private-synchronous:aero2;
+    #echo ncnc
+    sleep 10
+  done
+
+  if 
+    ping -c3 8.8.8.8 | grep -q '100% packet loss'
+  then
+    GTK_THEME=Adwaita yad --html --browser --uri=http://bdi.free.aero2.net.pl:8080/ --geometry=450x350+0+0 \
+    --on-top --borders=0 --undecorated --window-icon=a²  2>&1 /dev/null &
+    pid=$!
+
+    until wmctrl -lx | egrep yad.Yad | egrep -q "Aero2 - Bezpłatny Dostęp do Internetu"
+    do
+      sleep .5
+    done
+    kill -s 12 $pid
+
+    if wmctrl -lx | egrep -q gl.mpv
+    then
+    wmctrl -i -a $(wmctrl -lx | egrep gl.mpv | awk '{print $1}');
+    fi
+
+  else
+    #echo "ping ok"
+    sleep 10
+  fi
+done
+

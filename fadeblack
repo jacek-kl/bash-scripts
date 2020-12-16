@@ -1,0 +1,33 @@
+#!/bin/bash
+randir=/tmp/$RANDOM$RANDOM
+mkdir $randir
+if [ $# -ne 1 ]; then
+FILE=`zenity --file-selection  --title="Wybierz plik"`
+else
+FILE=$@
+fi
+convert "$FILE" -alpha copy -channel alpha -trim +repage "$randir/fade-black.png" && pqiv -P "0,0" --action="set_scale_mode_fit_px(320, 320)" --lazy-load --wait-for-images-to-appear --end-of-files-action=wait --watch-directories "$randir/" &
+pid=$!
+#echo $pid
+# feh -Tnofull -R 2 -B white -g 320x320 "/tmp/fade-black.png" 2>/dev/null &
+#zenity --scale --title "Fuzziness" --text="" --step=1 --value=100 --print-partial \
+#--window-icon=/home/jacek/.local/share/icons/hicolor/48x48/apps/krecik.png 2>/dev/null |####
+
+yad --scale --undecorated --image-on-top --step=1 --geometry=1000x100+0+320 \
+--on-top --title "Alpha" --image=imagemagick --button=yad-ok \
+--window-icon=imagemagick --max-value=200 --value=100 --print-partial --text="nie przesuwaj tylko klikaj, bo pqiv jest durny" 2>/dev/null |
+while read alpha
+do
+convert "$FILE" -alpha copy -channel alpha -evaluate Multiply $(echo $alpha/100 | bc -l ) -trim +repage "$randir/fade-black.png"
+done
+
+plikin="${FILE%.*}.png"
+#plikout=$(yad --file --on-top --title "Zapisz jako…" --window-icon=krecik \
+#--filename="$plikin" --save --confirm-overwrite="Czy na pewno chcesz zastąpić ten plik?" 2>/dev/null )
+plikout=$(zenity --file-selection --title "Zapisz jako…" \
+--filename="$plikin" --save --confirm-overwrite 2>/dev/null )
+
+pkill -P $pid && mv "$randir/fade-black.png" "$plikout" 2>/dev/null
+rm -R "$randir" 2>/dev/null
+sleep .1
+#exit 0

@@ -1,0 +1,73 @@
+#!/bin/bash
+printf "\033]0;3discdl\007"
+
+prepare(){
+clear
+if [[ ! $clarg ]]; then
+  echo "🎥 wklej URL filmu 🎥" | lolcat
+  read -r;
+  filmurl="${REPLY}"
+else
+  filmurl="$clarg"
+fi
+declare -g ID=$(echo "$filmurl" | cut -d, -f2 | cut -d- -f2)
+declare -g Nazwa=$(echo "$filmurl" | cut -d, -f3 | sed s/-/./g | sed s/,$//g)
+declare -g Tytul=$(echo $Nazwa | sed 's/./\u&/;s/\(.*\)\.\([^.]*\)$/\1\n\2/;s/\./ /g;s/\n/./g')
+download
+}
+
+download(){
+#echo "$ID $Nazwa $Tytul"
+#sleep 30
+clear
+cd $(xdg-user-dir VIDEOS)
+echo  "🎥Ściągam: ${Tytul}🎥" | lolcat
+wget -c --quiet --show-progress --user-agent="Mozilla/5.0 (X11; U; Linux x86_64; pl-PL) AppleWebKit/532.0 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/549.0" --referer="http://reseton.pl/static/player/v612/jwplayer.flash.swf" "http://stream.freedisc.pl/video/$ID/$Nazwa" -O "$Tytul"
+rc=$?
+#rc="${PIPESTATUS[0]}" # 2>&1 | lolcat
+check
+}
+
+check(){
+clear
+case $rc in
+  0) ifnext ;;
+  *) retry ;;
+esac
+}
+
+retry(){
+echo "Wystąpił błąd. 🎥 Ponawiam próbę ($Tytul) 🎥" | lolcat
+download
+}
+
+ifnext(){
+echo "🎥 $Tytul zapisany 🎥" | lolcat
+echo  "Ściągamy coś jeszcze? n / T" | lolcat
+read -n 1 -r
+if [[ $REPLY =~ ^[YyTt]$ || $REPLY = "" ]]
+then
+  unset $clarg
+  prepare
+else
+  koniec
+fi
+}
+
+koniec(){
+echo "Przyciśnij dowolny klawisz..." | lolcat
+read -rs -n 1
+}
+
+# najpierw zmiana rozmiaru terminala itd 😀
+printf '\033[8;3;105t'
+until wmctrl -lx | egrep 3discdl | egrep -q mate-terminal.Mate-terminal
+do sleep .1; done
+wid=$(wmctrl -lx | egrep 3discdl | egrep mate-terminal.Mate-terminal | awk '{print $1}')
+toggle-decorations $wid
+xseticon -id $wid '/home/jacek/.local/share/icons/freedisc.png'
+wmctrl -ir $wid -e 0,0,0,-1,-1
+
+# wszystko zadeklarowane, więc startujemy 😀
+prepare
+

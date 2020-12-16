@@ -1,0 +1,25 @@
+#!/bin/bash
+pic="$1"
+pic3="${pic##*/}"
+
+mkdir /home/jacek/temporary
+rsvg-convert -a -w 256 -f svg -o "/home/jacek/temporary/$pic3" "$pic"
+mv -f "/home/jacek/temporary/$pic3" /home/jacek/.icons/hicolor/256x256/apps/
+rsvg-convert -a -w 128 -f svg -o "/home/jacek/temporary/$pic3" "$pic"
+mv -f "/home/jacek/temporary/$pic3" /home/jacek/.icons/hicolor/128x128/apps/
+rsvg-convert -a -w 64 -f svg -o "/home/jacek/temporary/$pic3" "$pic"
+mv -f "/home/jacek/temporary/$pic3" /home/jacek/.icons/hicolor/64x64/apps/
+rsvg-convert -a -w 48 -f svg -o "/home/jacek/temporary/$pic3" "$pic"
+xdg-icon-resource install --context mimetypes --size 48 "$pic3"
+mv -f "/home/jacek/temporary/$pic3" /home/jacek/.icons/hicolor/48x48/apps/
+rsvg-convert -a -w 32 -f svg -o "/home/jacek/temporary/$pic3" "$pic"
+mv -f "/home/jacek/temporary/$pic3" /home/jacek/.icons/hicolor/32x32/apps/
+rsvg-convert -a -w 24 -f svg -o "/home/jacek/temporary/$pic3" "$pic"
+mv -f "/home/jacek/temporary/$pic3" /home/jacek/.icons/hicolor/24x24/apps/
+rsvg-convert -a -w 16 -f svg -o "/home/jacek/temporary/$pic3" "$pic"
+mv -f "/home/jacek/temporary/$pic3" /home/jacek/.icons/hicolor/16x16/apps/
+#xdg-icon-resource install --novendor "$pic"
+cp -f "$pic" /home/jacek/.local/share/icons/hicolor/scalable/apps/
+xdg-icon-resource forceupdate
+rm -r /home/jacek/temporary
+ 

@@ -1,0 +1,78 @@
+#!/bin/bash
+pulpit=$(xdg-user-dir DESKTOP)
+
+seticonawake(){
+  sed -i 's/Icon=laptop-sleep/Icon=laptop-awake/g' $pulpit/lid-close-action.desktop ;
+  sed -i 's/Name=zasypiaj/Name=pracuj/g' $pulpit/lid-close-action.desktop ;
+}
+
+seticonsleep(){
+  sed -i 's/Icon=laptop-awake/Icon=laptop-sleep/g' $pulpit/lid-close-action.desktop ;
+  sed -i 's/Name=pracuj/Name=zasypiaj/g' $pulpit/lid-close-action.desktop ;
+}
+
+lidcheck(){
+case $DESKTOP_SESSION in
+	gnome*)
+      state=$(dconf read /org/gnome/setting-daemon/plugins/power)
+    ;;
+	mate*)
+      state=$(dconf read /org/mate/power-manager/button-lid-ac)
+    ;;
+esac
+   case $state in
+	"'suspend'" )
+      seticonsleep ;
+      export "state=suspend" ;
+    ;;
+	"'blank'" )
+      seticonawake ;
+      export "state=blank" ;
+    ;;
+   esac
+}
+
+lidawake(){
+case $DESKTOP_SESSION in
+  gnome*)
+    dconf write /org/gnome/setting-daemon/plugins/power/button-lid-ac "'blank'" ;
+    dconf write /org/gnome/setting-daemon/plugins/power/button-lid-battery "'blank'" ;
+  ;;
+  mate*)
+    dconf write /org/mate/power-manager/button-lid-ac "'blank'" ;
+    dconf write /org/mate/power-manager/button-lid-battery "'blank'" ;
+  ;;
+esac
+seticonawake
+}
+
+lidsleep(){
+case $DESKTOP_SESSION in
+  gnome*)
+    dconf write /org/gnome/setting-daemon/plugins/power/button-lid-ac "'suspend'" ;
+    dconf write /org/gnome/setting-daemon/plugins/power/button-lid-battery "'suspend'" ;
+  ;;
+  mate*)
+    dconf write /org/mate/power-manager/button-lid-ac "'suspend'" ;
+    dconf write /org/mate/power-manager/button-lid-battery "'suspend'" ;
+  ;;
+esac
+seticonsleep
+}
+
+lidcycle(){
+lidcheck
+case $state in
+  suspend ) lidawake ;;
+  blank ) lidsleep ;;
+esac
+}
+
+case $1 in
+check) lidcheck;;
+sleep) lidsleep;;
+awake) lidawake;;
+cycle) lidcycle;;
+*) lidcycle;;
+esac
+

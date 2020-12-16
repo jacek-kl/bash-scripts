@@ -1,0 +1,122 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+ pic=`zenity --file-selection \
+ --title="Wybierz obrazek"`
+else
+pic="$@"
+fi
+
+if [[ -z $pic ]]; then
+exit 1
+fi
+
+pic2="${pic##*/}"
+nazwa="${pic2%.*}"
+pic3="${pic2%.*}.png"
+tempdir=/tmp/$RANDOM$RANDOM/
+pic4="$tempdir$pic3"
+mkdir $tempdir
+
+chosen=`yad --form --title="wybierz" --separator=" " \
+--columns=3 --window-icon="$pic" \
+--field=12:CHK \
+--field=16:CHK \
+--field=20:CHK \
+--field=24:CHK \
+--field=32:CHK \
+--field=40:CHK \
+--field=48:CHK \
+--field=64:CHK \
+--field=80:CHK \
+--field=96:CHK \
+--field=128:CHK \
+--field=160:CHK \
+--field=256:CHK \
+--field=320:CHK \
+--field=512:CHK \
+false true false true true false true true false false true false false false false `
+
+if [[ -z $chosen ]]; then
+exit 1
+fi
+
+if [ `echo "$chosen" | awk '{print $1}'` == TRUE ]; then
+convert -thumbnail 12x12 -unsharp 0.5x0.5+1.25+0.0 "$pic" "$pic4"
+pngout "$pic4"
+xdg-icon-resource install --size 12 --novendor "$pic4"
+fi
+if [ `echo "$chosen" | awk '{print $2}'` == TRUE ]; then
+convert -thumbnail 16x16 -unsharp 0.5x0.5+1.25+0.0 "$pic" "$pic4"
+pngout "$pic4"
+xdg-icon-resource install --size 16 --novendor "$pic4"
+fi
+if [ `echo "$chosen" | awk '{print $3}'` == TRUE ]; then
+convert -thumbnail 20x20 -unsharp 0.5x0.5+1.25+0.0 "$pic" "$pic4"
+pngout "$pic4"
+xdg-icon-resource install --size 20 --novendor "$pic4"
+fi
+if [ `echo "$chosen" | awk '{print $4}'` == TRUE ]; then
+convert -thumbnail 24x24 -unsharp 0.5x0.5+1.25+0.0 "$pic" "$pic4"
+pngout "$pic4"
+xdg-icon-resource install --size 24 --novendor "$pic4"
+fi
+if [ `echo "$chosen" | awk '{print $5}'` == TRUE ]; then
+convert -thumbnail 32x32 -unsharp 0.5x0.5+1.25+0.0 "$pic" "$pic4"
+pngout "$pic4"
+xdg-icon-resource install --size 32 --novendor "$pic4"
+fi
+if [ `echo "$chosen" | awk '{print $6}'` == TRUE ]; then
+convert -thumbnail 40x40 -unsharp 0.5x0.5+1.25+0.0 "$pic" "$pic4"
+pngout "$pic4"
+xdg-icon-resource install --size 40 --novendor "$pic4"
+fi
+if [ `echo "$chosen" | awk '{print $7}'` == TRUE ]; then
+convert -thumbnail 48x48 -unsharp 0.5x0.5+1.25+0.0 "$pic" "$pic4"
+pngout "$pic4"
+xdg-icon-resource install --size 48 --novendor "$pic4"
+fi
+if [ `echo "$chosen" | awk '{print $8}'` == TRUE ]; then
+convert -thumbnail 64x64 -unsharp 0.5x0.5+1.25+0.0 "$pic" "$pic4"
+pngout "$pic4"
+xdg-icon-resource install --size 64 --novendor "$pic4"
+fi
+if [ `echo "$chosen" | awk '{print $9}'` == TRUE ]; then
+convert -thumbnail 80x80 -unsharp 0.5x0.5+1.25+0.0 "$pic" "$pic4"
+pngout "$pic4"
+xdg-icon-resource install --size 80 --novendor "$pic4"
+fi
+if [ `echo "$chosen" | awk '{print $10}'` == TRUE ]; then
+convert -thumbnail 96x96 -unsharp 0.5x0.5+1.25+0.0 "$pic" "$pic4"
+pngout "$pic4"
+xdg-icon-resource install --size 96 --novendor "$pic4"
+fi
+if [ `echo "$chosen" | awk '{print $11}'` == TRUE ]; then
+convert -thumbnail 128x128 -unsharp 0.5x0.5+1.25+0.0 "$pic" "$pic4"
+pngout "$pic4"
+xdg-icon-resource install --size 128 --novendor "$pic4"
+fi
+if [ `echo "$chosen" | awk '{print $12}'` == TRUE ]; then
+convert -thumbnail 160x160 -unsharp 0.5x0.5+1.25+0.0 "$pic" "$pic4"
+pngout "$pic4"
+xdg-icon-resource install --size 160 --novendor "$pic4"
+fi
+if [ `echo "$chosen" | awk '{print $13}'` == TRUE ]; then
+convert -thumbnail 256x256 -unsharp 0.5x0.5+1.25+0.0 "$pic" "$pic4"
+pngout "$pic4"
+xdg-icon-resource install --size 256 --novendor "$pic4"
+fi
+if [ `echo "$chosen" | awk '{print $14}'` == TRUE ]; then
+convert -thumbnail 320x320 -unsharp 0.5x0.5+1.25+0.0 "$pic" "$pic4"
+pngout "$pic4"
+xdg-icon-resource install --size 320 --novendor "$pic4"
+fi
+if [ `echo "$chosen" | awk '{print $15}'` == TRUE ]; then
+convert -thumbnail 512x512 -unsharp 0.5x0.5+1.25+0.0 "$pic" "$pic4"
+pngout "$pic4"
+xdg-icon-resource install --size 512 --novendor "$pic4"
+fi
+
+xdg-icon-resource forceupdate
+rm -r $tempdir
+notify-send -i $nazwa "ikona: „$nazwa”" "zrobiona i zainstalowana"

@@ -1,0 +1,53 @@
+#!/bin/bash
+if [ $# -ne 1 ]; then
+   textfile=`zenity --file-selection \
+   --title="Wybierz plik"`
+else
+   textfile="$@"
+fi
+
+cd "${textfile%/*}"
+#text=$(cat "$textfile") --field="No i tekst":TXT \
+fontdirs="/usr/share/fonts /home/jacek/.fonts /home/jacek/.local/share/fonts"
+font=/home/jacek/.local/share/fonts/Cookie-Regular.ttf
+output="${textfile%.*}.png"
+
+
+if grep -qEn '.{66}' "$textfile";
+then
+    lenth=$(yad --scale --title="Za długie linie" --window-icon=dialog-question \
+    --image=dialog-question --min-value=1 --value=66 --max-value=160 \
+    --text="Ten plik zawiera linie dłuższe niż 66 znaków.\nCzy je zawinąć?\nJeśli tak to na jakiej długości?" \
+    --button="Nie!gtk-cancel:1" --button="Tak!gtk-ok:0" --text-align=fill)
+    ret=$?
+    if [ $ret == 0 ];
+    then
+        fold -sw $lenth "$textfile" > /tmp/rcotemptextfile
+        textfile=/tmp/rcotemptextfile
+    fi
+fi
+
+whatandhow=$(yad --form --title="Tekst → Obrazek" --center \
+--item-separator="	" \
+--image=insert-text --window-icon=insert-text \
+--field="Wybierz czcionkę":CB \
+--field="Wielkość czcionki":SCL \
+--field="Kolor czcionki":CLR \
+--field="Kolor tła":CBE \
+--field="Margines":SCL \
+"$font	$(find $fontdirs \( -name "*.ttf" -o -name "*.woff" -o -name "*.otf" \) -type f -print0 | sort -fz | python -c 'import sys; sys.stdout.write(sys.stdin.read().replace("\0", "\t"))')" \
+"24" "#ffffcc" "#00000000" "0")
+
+if [ "$whatandhow" = "" ] ; then
+    exit 0
+fi
+
+font=$(echo "$whatandhow" | cut -d'|' -f1)
+size=$(echo "$whatandhow" | cut -d'|' -f2)
+forgr=$(echo "$whatandhow" | cut -d'|' -f3)
+backgr=$(echo "$whatandhow" | cut -d'|' -f4)
+marg=$(echo "$whatandhow" | cut -d'|' -f5)
+
+hb-view --text-file="$textfile" --font-file="$font" --font-size="$size" --foreground="$forgr" --background="$backgr" --margin="$marg" -O png -o "$output"
+
+
